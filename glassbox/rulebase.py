@@ -13,7 +13,7 @@ import numpy as np
 
 from . import config
 from .fcm import fuzzy_c_means
-from .membership import gaussian
+from .membership import log_memberships
 
 DONT_CARE = -1
 
@@ -46,8 +46,8 @@ def fcm_rules(X_norm, target, centers, sigmas, n_clusters, seed=config.SEED) -> 
     rules = []
     for i in order:
         center = result.centers[i, :-1]
-        mu = gaussian(center[:, None], centers, sigmas)       # (n_features, n_terms)
-        rule = tuple(int(t) for t in mu.argmax(axis=1))
+        log_mu = log_memberships(center[None], centers, sigmas)[0]     # (n_features, n_terms)
+        rule = tuple(int(t) for t in log_mu.argmax(axis=1))
         if rule not in rules:
             rules.append(rule)
     return np.array(rules, dtype=int)

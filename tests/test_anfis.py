@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from glassbox.anfis import ANFIS
-from glassbox.membership import gaussian, initial_partition
+from glassbox.membership import gaussian, initial_partition, log_memberships
 from glassbox.rulebase import DONT_CARE, grid_rules
 
 
@@ -17,6 +17,13 @@ def test_initial_terms_cross_at_half_membership():
     centers, sigmas = initial_partition(np.linspace(0, 1, 101), 3)
     midpoint = (centers[0] + centers[1]) / 2
     assert gaussian(midpoint, centers[0], sigmas[0]) == pytest.approx(0.5)
+
+
+def test_outer_terms_are_shoulders():
+    centers, sigmas = np.array([[0.2, 0.5, 0.8]]), np.array([[0.1, 0.1, 0.1]])
+    mu = np.exp(log_memberships(np.array([[0.0], [0.5], [1.0]]), centers, sigmas))[:, 0]
+    assert mu[0, 0] == 1.0 and mu[2, 2] == 1.0          # far below Low / far above High
+    assert mu[1, 1] == 1.0 and mu[0, 1] < 0.01          # Medium is an ordinary bell
 
 
 def test_grid_rule_count():
@@ -74,7 +81,9 @@ def test_constraints_keep_terms_ordered_and_close_to_start():
     X, y = toy()
     model = ANFIS(["a", "b"], n_terms=3, rule_init="grid", epochs=200, lr=0.1).fit(X, y)
     assert np.all(np.diff(model.centers_, axis=1) > 0)
-    assert np.all(np.abs(model.centers_ - model.initial_centers_) <= model.max_shift + model.min_gap + 1e-9)
+    gaps, initial_gaps = np.diff(model.centers_, axis=1), np.diff(model.initial_centers_, axis=1)
+    assert np.all(gaps >= model.min_gap_ratio * initial_gaps - 1e-9)
+    assert np.all(np.abs(model.centers_ - model.initial_centers_) <= model.max_shift + initial_gaps.max() + 1e-9)
     assert np.all(model.sigmas_ >= model.initial_sigmas_ * model.sigma_range[0] - 1e-12)
     assert np.all(model.sigmas_ <= model.initial_sigmas_ * model.sigma_range[1] + 1e-12)
 

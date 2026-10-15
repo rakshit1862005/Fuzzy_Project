@@ -10,6 +10,7 @@ far easier to read than first-order rules with a linear formula after THEN.
 The five ANFIS layers, for one input vector x:
 
     1. Fuzzification     mu_jt(x_j) = exp(-(x_j - c_jt)^2 / (2 s_jt^2))
+                         ("Low" and "High" are shoulders: flat at 1 beyond their centre)
     2. Rule firing       w_r  = product of the memberships named in rule r  (AND = product)
     3. Normalisation     wn_r = w_r / sum_q w_q
     4. Consequents       wn_r * p_r
@@ -23,8 +24,8 @@ Hybrid learning (one epoch):
 
 Interpretability constraints after every update keep the terms meaningful:
 each centre may drift at most `max_shift` from its starting position (so
-"Low" stays low), centres stay sorted (Low < Medium < High) with a minimum
-gap, and each width stays between half and double its starting value (so no
+"Low" stays low), centres stay sorted (Low < Medium < High) and neighbours
+keep at least half of their original distance, and each width stays between half and double its starting value (so no
 term shrinks to a spike or swallows its neighbours).
 
 All computations happen on inputs min-max scaled to [0, 1]; centres and widths
@@ -35,7 +36,7 @@ import copy
 import numpy as np
 
 from . import config
-from .membership import initial_partition, term_names
+from .membership import initial_partition, log_memberships, term_names, term_offsets
 from .rulebase import DONT_CARE, fcm_rules, grid_rules
 
 
@@ -72,7 +73,7 @@ class ANFIS:
         lr=config.ANFIS_LR,
         ridge=1.0,
         constrain=True,
-        min_gap=0.05,
+        min_gap_ratio=0.5,
         max_shift=0.1,
         sigma_range=(0.5, 2.0),
         threshold=config.DECISION_THRESHOLD,
@@ -88,7 +89,7 @@ class ANFIS:
         self.lr = lr
         self.ridge = ridge
         self.constrain = constrain
-        self.min_gap = min_gap
+        self.min_gap_ratio = min_gap_ratio
         self.max_shift = max_shift
         self.sigma_range = sigma_range
         self.threshold = threshold
@@ -110,7 +111,7 @@ class ANFIS:
     def _log_memberships(self, Xn, centers=None, sigmas=None):
         c = self.centers_ if centers is None else centers
         s = self.sigmas_ if sigmas is None else sigmas
-        return -0.5 * ((Xn[:, :, None] - c[None]) / s[None]) ** 2      # (n, k, m)
+        return log_memberships(Xn, c, s)                                # (n, k, m)
 
     def _log_firing(self, Xn, centers=None, sigmas=None, antecedents=None):
         """log w_r = sum of log-memberships in rule r (log of the product).
@@ -150,20 +151,22 @@ class ANFIS:
 
         Chain rule: dL/dtheta = sum_n sum_r G[n, r] * dlog(w_r)/dtheta, where
             G[n, r] = 2/N * (y_n - t_n) * wn_r * (p_r - y_n)
-        and for a Gaussian term used by rule r:
-            dlog(mu)/dc = (x - c) / s^2,     dlog(mu)/ds = (x - c)^2 / s^3
+        and for a Gaussian term used by rule r, with d = x - c:
+            dlog(mu)/dc = d / s^2,     dlog(mu)/ds = d^2 / s^3
+        (on the flat part of a shoulder d = 0, so the gradient is 0 there).
         """
         p = self.consequents_
         G = (2.0 / len(Xn)) * (y - target)[:, None] * wbar * (p[None, :] - y[:, None])
         grad_c = np.zeros_like(self.centers_)
         grad_s = np.zeros_like(self.sigmas_)
+        offsets = term_offsets(Xn, self.centers_)
         for j in range(self.centers_.shape[0]):
             for t in range(self.n_terms):
                 rules_using = self.antecedents_[:, j] == t
                 if not rules_using.any():
                     continue
                 g = G[:, rules_using].sum(axis=1)
-                diff = Xn[:, j] - self.centers_[j, t]
+                diff = offsets[:, j, t]
                 s = self.sigmas_[j, t]
                 grad_c[j, t] = np.sum(g * diff) / s ** 2
                 grad_s[j, t] = np.sum(g * diff ** 2) / s ** 3
@@ -179,8 +182,9 @@ class ANFIS:
         order = np.argsort(self.centers_, axis=1)            # keep Low < Medium < High
         self.centers_ = np.take_along_axis(self.centers_, order, axis=1)
         self.sigmas_ = np.take_along_axis(self.sigmas_, order, axis=1)
+        min_gaps = self.min_gap_ratio * np.diff(self.initial_centers_, axis=1)
         for t in range(1, self.n_terms):                     # terms may not merge
-            self.centers_[:, t] = np.maximum(self.centers_[:, t], self.centers_[:, t - 1] + self.min_gap)
+            self.centers_[:, t] = np.maximum(self.centers_[:, t], self.centers_[:, t - 1] + min_gaps[:, t - 1])
         self.sigmas_ = np.clip(self.sigmas_, self.initial_sigmas_ * self.sigma_range[0],
                                self.initial_sigmas_ * self.sigma_range[1])
 
