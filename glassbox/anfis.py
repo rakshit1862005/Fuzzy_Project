@@ -24,7 +24,8 @@ Hybrid learning (one epoch):
 Interpretability constraints after every update keep the terms meaningful:
 each centre may drift at most `max_shift` from its starting position (so
 "Low" stays low), centres stay sorted (Low < Medium < High) with a minimum
-gap, and widths stay within [sigma_min, sigma_max].
+gap, and each width stays between half and double its starting value (so no
+term shrinks to a spike or swallows its neighbours).
 
 All computations happen on inputs min-max scaled to [0, 1]; centres and widths
 are converted back to original units only for display.
@@ -73,8 +74,7 @@ class ANFIS:
         constrain=True,
         min_gap=0.05,
         max_shift=0.1,
-        sigma_min=0.03,
-        sigma_max=0.5,
+        sigma_range=(0.5, 2.0),
         threshold=config.DECISION_THRESHOLD,
         seed=config.SEED,
     ):
@@ -90,8 +90,7 @@ class ANFIS:
         self.constrain = constrain
         self.min_gap = min_gap
         self.max_shift = max_shift
-        self.sigma_min = sigma_min
-        self.sigma_max = sigma_max
+        self.sigma_range = sigma_range
         self.threshold = threshold
         self.seed = seed
 
@@ -182,7 +181,8 @@ class ANFIS:
         self.sigmas_ = np.take_along_axis(self.sigmas_, order, axis=1)
         for t in range(1, self.n_terms):                     # terms may not merge
             self.centers_[:, t] = np.maximum(self.centers_[:, t], self.centers_[:, t - 1] + self.min_gap)
-        self.sigmas_ = np.clip(self.sigmas_, self.sigma_min, self.sigma_max)
+        self.sigmas_ = np.clip(self.sigmas_, self.initial_sigmas_ * self.sigma_range[0],
+                               self.initial_sigmas_ * self.sigma_range[1])
 
     def fit(self, X, target, X_val=None, target_val=None):
         """Train on inputs X and targets in [0, 1] (here: the network's probabilities).

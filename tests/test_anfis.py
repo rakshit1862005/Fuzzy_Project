@@ -75,7 +75,8 @@ def test_constraints_keep_terms_ordered_and_close_to_start():
     model = ANFIS(["a", "b"], n_terms=3, rule_init="grid", epochs=200, lr=0.1).fit(X, y)
     assert np.all(np.diff(model.centers_, axis=1) > 0)
     assert np.all(np.abs(model.centers_ - model.initial_centers_) <= model.max_shift + model.min_gap + 1e-9)
-    assert np.all(model.sigmas_ >= model.sigma_min)
+    assert np.all(model.sigmas_ >= model.initial_sigmas_ * model.sigma_range[0] - 1e-12)
+    assert np.all(model.sigmas_ <= model.initial_sigmas_ * model.sigma_range[1] + 1e-12)
 
 
 def test_dont_care_condition_ignores_feature():
