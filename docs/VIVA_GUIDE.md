@@ -44,20 +44,30 @@ Everything you need to present and defend the project. Read
 
 ## 3. Demo script (5 minutes)
 
-1. `streamlit run app.py`, then open the **About** tab: what the black box is and
-   what the explainer is.
-2. **Test-set patient 152** (a typical diabetic case) - read the two predictions
-   and point at "Do they agree?".
+1. `python -m streamlit run app.py`, then open the **About** tab: what the black
+   box is and what the explainer is.
+2. The app opens on **test patient #152** (glucose 184, BMI 37, age 31). Both
+   models say 0.84, and the green badge shows one rule fits this patient well.
 3. **Why this decision?** tab:
-   - the bar chart shows which rules carried the decision;
+   - the bar chart shows rule R4 ("Glucose is High AND BMI is Medium AND Age is
+     Medium") carrying 98 % of the decision;
    - in the table, show that the *contributions add up exactly to the fuzzy risk*.
 4. **Linguistic terms** tab - the orange line is the patient. Show how a value is
    partly "Medium" and partly "High" at the same time. That is fuzzy logic.
-5. Switch to **Enter values**. Raise Glucose step by step and watch the rule
-   weights shift from "Glucose is Low" rules to "Glucose is High" rules.
-6. **Test-set patient 108** - a weak-match warning appears. No rule describes
-   a 67-year-old with very high glucose and low BMI well, and the system says
-   so instead of pretending.
+5. Drag the **Glucose** slider down and narrate (measured values):
+
+   | Glucose | Network | Fuzzy | Rule with the largest weight |
+   |---|---|---|---|
+   | 184 | 0.84 | 0.84 | R4 Glucose High (0.98) |
+   | 150 | 0.66 | 0.66 | R4 Glucose High (0.49), R2 Glucose Medium (0.30) |
+   | 130 | 0.46 | 0.51 | R2 Glucose Medium (0.49) - *the two disagree here* |
+   | 110 | 0.26 | 0.33 | R1 Glucose Low (0.41), R2 (0.38) |
+
+   At 130 the patient sits on the network's decision boundary, and that is
+   exactly where the fuzzy system disagrees. That makes a good talking point.
+6. Pick **test patient #108** from the list. A weak-match warning appears: no
+   rule describes a 67-year-old with very high glucose and low BMI well, and the
+   system says so instead of pretending.
 7. **All rules** tab - the full rule base fits on one screen.
 8. End on the trade-off plot in `results/figures/tradeoff.png`.
 
@@ -72,7 +82,7 @@ Everything you need to present and defend the project. Read
 | Network tuned by 5-fold CV, no early stopping | Early stopping's hold-out was only about 70 patients and made results unstable. Fixed epochs plus L2 gave stable CV scores. |
 | Surrogate learns the network's **probability** | It explains the network, not the disease. Probabilities also tell the surrogate how confident the network is. |
 | Only the top 4 inputs (permutation importance) | Rules with 8 conditions are unreadable. The top 4 carry most of what the network uses. |
-| Zero-order Takagi-Sugeno | "THEN risk = 0.83" is readable; "THEN y = 0.3·Glucose − 1.2·BMI + …" is not. |
+| Zero-order Takagi-Sugeno | "THEN risk = 0.85" is readable; a linear formula is not. We measured the alternative: first-order rules were *not* more faithful (94.3 % vs 94.8 %) and needed 18 numbers after THEN instead of 5. |
 | Shared Low / Medium / High terms | "Glucose is High" means the same thing in every rule. |
 | FCM instead of a grid of rules | A grid needs 3⁴ = 81 rules for 4 inputs; FCM proposes about 8. |
 | Clustering inputs **and** the network output together | Clusters then group patients who look alike *and* get similar decisions. |
@@ -83,7 +93,7 @@ Everything you need to present and defend the project. Read
 | Oracle sampling | The network can label as many synthetic patients as we like, giving the surrogate more data (the TREPAN idea). Adds 1.3 points of fidelity in the ablation. |
 | Match-strength flag | Normalised weights always sum to 1, so a rule can "win" even when it barely fits. Reporting the best raw firing strength exposes this. |
 | Pruning with two checks + fine-tuning | Pruning roughly halves the rule base or more. The probability-error check stops it pushing patients to the 0.5 edge, where they flip on new data. |
-| Decision-tree baseline at the same size | Answers "why not just use a tree?" with numbers. |
+| Decision-tree baseline at the same size | Answers "why not just use a tree?" with numbers: at 4 rules, tree 87.7 % vs fuzzy 92.2 %. |
 | Implemented from scratch with NumPy | So every line can be explained in the viva. Gradients are verified numerically in the tests. |
 
 ---
@@ -97,15 +107,25 @@ Everything you need to present and defend the project. Read
   points of fidelity. That is why the trade-off study averages 5 random seeds.
 - **The fuzzy system uses 4 of the 8 inputs.** If the network relied heavily on a
   dropped input, the explanation would miss it. Permutation importance shows the
-  dropped four carry little weight.
+  dropped four carry little weight. Permutation importance itself can mislead
+  when inputs are correlated (Age and Pregnancies are), because shuffling one
+  creates unrealistic patients.
 - **Fidelity is not truth.** If the network is wrong, a faithful explanation
   faithfully explains a wrong decision. That is the point: it lets a doctor
   *see* that the reasoning is wrong.
 - **Some patients have no good rule.** 15 % of test patients have a weak match
   (best rule fires below 0.2). Their explanations are flagged, not hidden.
-- **Results vary a little with the random seed.** The main model (seed 42) has
-  92.2 % fidelity after pruning, while the 5-seed average for the same setting is 94.8 %.
-  That is why the trade-off study reports means and standard deviations.
+- **Results vary with the random seed.** The main model (seed 42) has 92.2 %
+  fidelity after pruning. Five *other* seeds (0 to 4) average 94.8 % ± 1.1 after
+  pruning and 95.1 % ± 0.7 before. Compare before/after within the same seeds, not
+  across them. That is why the trade-off study reports means and standard deviations.
+- **The rules themselves change between seeds.** Different runs produce somewhat
+  different rule bases with similar fidelity. Which one is "the" explanation is
+  an open research question (explanation stability) that we did not solve.
+- **Interpretability is measured by proxies** (rule and condition counts), not by
+  asking doctors whether the rules help. That would need a user study.
+- **Only one baseline explainer** (a decision tree). Standard XAI methods such as
+  LIME, SHAP or Anchors were not compared.
 - **Not a medical tool.** The data are from one population of 768 women.
 
 ---
@@ -262,9 +282,15 @@ decision tree. The upper-left is best. Simplified ANFIS reaches similar fidelity
 with far fewer conditions.
 
 **28. Why compare with a decision tree?**
-It is the standard global surrogate in XAI. At the same number of rules, our
-fuzzy rules are as faithful or more faithful (see `summary.md` §4) and give
-graded, smooth outputs instead of hard thresholds.
+It is the standard global surrogate in XAI. Compare at equal size, never
+unequal sizes:
+- same number of rules (4): tree 87.7 %, our pruned rules 92.2 %;
+- about the same number of conditions (~12): tree with 5 leaves 90.3 %, our
+  pruned rules averaged over 5 seeds 94.8 %.
+
+The fuzzy rules also give graded outputs instead of hard thresholds. Our
+explanation for the gap (not proven): smooth, overlapping terms follow the
+network's smooth decision surface better than axis-aligned cuts.
 
 **29. Where does the fuzzy system disagree with the network?**
 Mostly near the network's decision boundary (probability 0.35 to 0.65); see
@@ -278,8 +304,8 @@ each of their conditions is satisfied, and the contributions add up exactly to
 the output. See `results/case_studies.md`.
 
 **31. Do the rules make medical sense?**
-Yes. High glucose and high BMI lead to high risk, and low glucose to very low
-risk. These match known risk factors (impaired glucose tolerance, obesity,
+Mostly. High glucose and high BMI lead to high risk, and low glucose to very
+low risk. These match known risk factors (impaired glucose tolerance, obesity,
 age). Show `results/rules.md`.
 
 **32. How would you extend this?**
@@ -311,10 +337,42 @@ standard practice in fuzzy controllers.
 The normalised weights always sum to 1, so some rule always "wins", even for a
 patient no rule fits. Match strength is the raw firing strength of the best
 rule, $\max_r w_r$. Below 0.2 we flag the explanation as weak. This happens for
-15 % of test patients, mostly unusual combinations such as very high glucose
-with low BMI in an elderly patient.
+15 % of test patients, for example patient #108: a 67-year-old with very high
+glucose but low BMI.
 
 **38. Your rules don't mention BloodPressure or Insulin. Is that wrong?**
 No. The network itself hardly uses them: together they account for under 8 % of
 its permutation importance. The rules describe what the network relies on,
 not textbook medicine.
+
+**39. Why zero-order rules and not first-order (linear) THEN-parts?**
+We tested both (ablation in `results/summary.md` §5). First-order rules were not
+more faithful: 94.3 % vs 94.8 %, within the seed-to-seed spread. They needed 18
+numbers after THEN instead of 5. They can also read strangely: in one run, a
+rule's formula had risk *falling* as glucose rose. Zero-order gives the same
+fidelity with outputs a doctor can read at a glance.
+
+**40. Your main model has 92.2 % fidelity, but you also quote 94.8 %. Which is it?**
+Both, for different things. 92.2 % is the single model we show (seed 42), which
+happened to prune down to 4 rules. 94.8 % ± 1.1 is the average of five other
+seeds for the same setting, which kept about 5 rules. Before pruning, those
+same five seeds average 95.1 % ± 0.7. So pruning costs about 0.3 points on
+average; our showcase run lost more because it pruned harder.
+
+**41. Can you trust permutation importance?**
+As a ranking of what the network uses, yes, approximately: it needs only the
+network's outputs. Its known weakness is correlated inputs. Shuffling Age while
+keeping Pregnancies creates unrealistic patients (a 22-year-old with 12
+pregnancies) and can over- or under-state importance. Glucose's lead (44 %) is
+large enough that the top choice is not in doubt.
+
+**42. Is this a real research problem, or only a course exercise?**
+The problem is real and active. The interpretability–accuracy trade-off is a
+central theme of fuzzy modelling (Casillas et al., 2003; Gacto et al., 2011).
+Fuzzy logic is argued to be a natural tool for explainable AI (Hagras, 2018),
+and regulation such as GDPR and the EU AI Act pushes for explainable automated
+decisions. Our project is a course-scale study of it. Every component we use
+already exists; the contribution is combining and evaluating them carefully.
+Turning it into research would need several datasets with statistical tests,
+comparison with LIME, SHAP and Anchors, a user study with clinicians, and an
+analysis of how stable the rules are across runs.

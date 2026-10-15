@@ -92,3 +92,6 @@ fuzzy system $f_{FIS}: X \to [0,1]$ such that
    diabetes mellitus. *Proc. Symposium on Computer Applications in Medical Care*, 261-265.
 9. Kingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. *ICLR*.
 10. Molnar, C. (2022). *Interpretable Machine Learning* (2nd ed.). christophm.github.io/interpretable-ml-book
+11. Casillas, J., Cordón, O., Herrera, F., & Magdalena, L. (Eds.) (2003). *Interpretability Issues in
+    Fuzzy Modeling*. Springer.
+12. Hagras, H. (2018). Toward human-understandable, explainable AI. *Computer*, 51(9), 28-36.

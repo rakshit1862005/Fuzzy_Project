@@ -188,10 +188,13 @@ Experiments:
 
 1. **Trade-off sweep** - FCM cluster counts 2 to 16, 5 random seeds each,
    before and after simplification, compared with a decision tree trained on the
-   network's labels and limited to the same number of leaves.
+   network's labels and limited to the same number of leaves. The main model
+   uses a separate seed (42); before/after comparisons are always made within
+   the same seeds.
 2. **Grid ANFIS** (all term combinations) as the classical reference.
 3. **Ablations** - without oracle sampling, without interpretability
-   constraints, and trained on true labels instead of the network.
+   constraints, trained on true labels instead of the network, and with
+   first-order (linear) THEN-parts instead of constants.
 4. **Number of inputs** - 2 to 6 features.
 5. **Case studies** - a confident diabetic, a confident non-diabetic, a borderline
    patient and (if any) a disagreement between the fuzzy system and the network.
