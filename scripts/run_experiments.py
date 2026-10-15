@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from glassbox import config, plots  # noqa: E402
 from glassbox.blackbox import tune_mlp  # noqa: E402
 from glassbox.data import load_dataset  # noqa: E402
-from glassbox.explain import explain_instance, explanation_markdown  # noqa: E402
+from glassbox.explain import WEAK_MATCH, explain_instance, explanation_markdown  # noqa: E402
 from glassbox.feature_selection import permutation_importance, top_features  # noqa: E402
 from glassbox.metrics import (  # noqa: E402
     anfis_complexity,
@@ -124,16 +124,20 @@ def main(quick=False):
     nn_prob = bb.predict_proba(data.X_test)
     fz_pred = model.predict(Xt)
     agree = fz_pred == bb.predict(data.X_test)
+    match = model.firing_strengths(Xt)[0].max(axis=1)      # how well the best rule fits each patient
+    # Typical confident cases: the network is sure, both agree, and a rule fits the patient well.
     cases = {
-        "confident_diabetic": int(np.argmax(np.where(agree, nn_prob, -1))),
-        "confident_healthy": int(np.argmin(np.where(agree, nn_prob, 2))),
+        "confident_diabetic": int(np.argmax(np.where(agree & (nn_prob > 0.8), match, -1))),
+        "confident_healthy": int(np.argmax(np.where(agree & (nn_prob < 0.2), match, -1))),
         "borderline": int(np.argmin(np.abs(nn_prob - 0.5))),
+        "unusual_patient": int(np.argmin(match)),
     }
     if (~agree).any():
         cases["disagreement"] = int(np.flatnonzero(~agree)[np.argmax(np.abs(nn_prob[~agree] - 0.5))])
     case_doc = ["# Case studies (test-set patients)", "",
                 "Each case shows the patient, both models' outputs, how each input was fuzzified, "
-                "and which rules produced the answer.", ""]
+                "and which rules produced the answer. *Match strength* is the raw firing strength "
+                "of the best rule: below 0.2 the rule base has no good description of the patient.", ""]
     for name, i in cases.items():
         expl = explain_instance(model, Xt[i], nn_prob=nn_prob[i])
         title = f"{name.replace('_', ' ').title()} (test patient #{i})"
@@ -267,6 +271,8 @@ The fuzzy system uses the top {config.N_FEATURES}: **{', '.join(names)}**.
 - *fidelity* = share of test patients where fuzzy decision = network decision
 - *boundary / confident* = fidelity where the network's probability is within / outside 0.35-0.65
 - *prob_mae* = mean |fuzzy risk - network probability|
+- {np.mean(match < WEAK_MATCH):.0%} of test patients have a *weak match* (no rule fires above
+  {WEAK_MATCH}); their explanations are flagged as less reliable
 
 The rules themselves are in [rules.md](rules.md); worked examples in
 [case_studies.md](case_studies.md).

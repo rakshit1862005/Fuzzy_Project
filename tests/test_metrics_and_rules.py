@@ -34,6 +34,7 @@ def test_explanation_contributions_sum_to_output():
     total = sum(r["contribution"] for r in expl["rules"])
     assert np.isclose(total, model.predict_proba(X[:1])[0], atol=1e-9)
     assert "Top 3 rules" in explanation_markdown(expl)
+    assert 0.0 < expl["match_strength"] <= 1.0
 
 
 def test_simplify_reduces_complexity_without_losing_fidelity():

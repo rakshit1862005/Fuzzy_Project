@@ -66,6 +66,10 @@ c3.metric("Do they agree?", "Yes" if expl["agree"] else "No",
           f"test-set fidelity {fidelity(model.predict(data.X_test[:, selected]), bb.predict(data.X_test)):.1%}",
           delta_color="off")
 
+if expl["weak_match"]:
+    st.warning(f"Weak match: the best rule fits this patient only to degree {expl['match_strength']:.2f}. "
+               "The rule base has no good description of such a patient, so treat the explanation with care.")
+
 why, rules_tab, terms_tab, about = st.tabs(["Why this decision?", "All rules", "Linguistic terms", "About"])
 
 with why:

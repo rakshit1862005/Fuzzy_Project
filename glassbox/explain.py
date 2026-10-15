@@ -3,12 +3,20 @@
 Because the fuzzy output is y = sum_r wn_r * p_r, each rule's share of the
 final answer is exactly wn_r * p_r. These contributions add up to y, so the
 explanation is complete - nothing is hidden.
+
+Normalisation has one catch: the weights always sum to 1, even for an
+unusual patient whom no rule describes well. So we also report the *match
+strength* - the raw firing strength of the best rule. A low value means "the
+rule base has no good description of this patient", and the explanation
+says so instead of sounding confident.
 """
 import numpy as np
 
 from . import config
 from .rules import condition_text, risk_label, rule_text
 from .rulebase import DONT_CARE
+
+WEAK_MATCH = 0.2    # best rule fires below this -> explanation flagged as weak
 
 
 def explain_instance(model, x, nn_prob=None, top_k=None) -> dict:
@@ -47,6 +55,8 @@ def explain_instance(model, x, nn_prob=None, top_k=None) -> dict:
         "rules": rules,
         "fuzzy_output": output,
         "fuzzy_decision": config.CLASS_NAMES[int(output >= model.threshold)],
+        "match_strength": float(w.max()),
+        "weak_match": bool(w.max() < WEAK_MATCH),
     }
     if nn_prob is not None:
         out["nn_prob"] = float(nn_prob)
@@ -68,6 +78,8 @@ def explanation_markdown(expl, title="Case", top_k=3, true_label=None) -> str:
                  + ("" if "agree" not in expl else (" (agrees)" if expl["agree"] else " (DISAGREES)")))
     if true_label is not None:
         lines.append(f"- Actual outcome: {config.CLASS_NAMES[int(true_label)]}")
+    lines.append(f"- Match strength (best rule's raw firing): {expl['match_strength']:.2f}"
+                 + (" - **weak: no rule describes this patient well**" if expl["weak_match"] else ""))
     lines += ["", "**Fuzzified inputs (degree of membership):**", ""]
     for name, terms in expl["memberships"].items():
         lines.append("- " + name + ": " + ", ".join(f"{t} {m:.2f}" for t, m in terms.items()))

@@ -5,7 +5,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from .membership import gaussian  # noqa: E402
+from .membership import log_memberships  # noqa: E402
 
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
@@ -79,12 +79,12 @@ def membership_functions(model, path, x=None):
         ax = axes[j // cols][j % cols]
         xs = np.linspace(0, 1, 400)
         x_orig = model.lo_[j] + xs * model.span_[j]
+        mu0 = np.exp(log_memberships(xs[:, None], model.initial_centers_[j:j + 1], model.initial_sigmas_[j:j + 1]))[:, 0]
+        mu = np.exp(log_memberships(xs[:, None], model.centers_[j:j + 1], model.sigmas_[j:j + 1]))[:, 0]
         for t, term in enumerate(model.term_names):
             color = TERM_RAMP[t] if model.n_terms == 3 else SERIES[t % 3]
-            ax.plot(x_orig, gaussian(xs, model.initial_centers_[j, t], model.initial_sigmas_[j, t]),
-                    color=color, lw=1, ls="--", alpha=0.7)
-            ax.plot(x_orig, gaussian(xs, model.centers_[j, t], model.sigmas_[j, t]),
-                    color=color, lw=2, label=term)
+            ax.plot(x_orig, mu0[:, t], color=color, lw=1, ls="--", alpha=0.7)
+            ax.plot(x_orig, mu[:, t], color=color, lw=2, label=term)
         if x is not None:
             ax.axvline(x[j], color=SERIES[1], lw=1.5)
             ax.text(x[j], 1.04, f" patient: {x[j]:.4g}", color=INK_2, fontsize=8, va="bottom")
@@ -126,10 +126,9 @@ def tradeoff(summary, path):
                         markeredgecolor=SURFACE, markeredgewidth=1.5)
         ax.set_xlabel(xlabel)
         ax.set_xlim(left=0)
-    axes[1].annotate("better: fewer conditions,\nhigher fidelity", xy=(0.02, 0.97), xycoords="axes fraction",
-                     va="top", fontsize=8, color=MUTED)
     axes[0].set_ylabel("fidelity to the network (test set)")
-    axes[0].set_title("Fidelity vs interpretability (each dot = one configuration)", loc="left")
+    fig.suptitle("Fidelity vs interpretability - each dot is one configuration; upper left is better",
+                 x=0.01, ha="left", fontsize=11, fontweight="bold", color=INK)
     axes[1].legend(loc="lower right")
     return _save(fig, path)
 
@@ -149,7 +148,8 @@ def case_contributions(expl, path, top_k=6):
     ax.set_xlim(0, 1.25)
     ax.set_xlabel("normalised firing strength (share of the decision)")
     nn = f"network {expl['nn_prob']:.2f}, " if "nn_prob" in expl else ""
-    ax.set_title(f"Why: {nn}fuzzy risk {expl['fuzzy_output']:.2f} -> {expl['fuzzy_decision']}",
-                 loc="left")
+    weak = "  (weak match)" if expl.get("weak_match") else ""
+    fig.suptitle(f"Why: {nn}fuzzy risk {expl['fuzzy_output']:.2f} -> {expl['fuzzy_decision']}{weak}",
+                 x=0.01, ha="left", fontsize=11, fontweight="bold", color=INK)
     ax.grid(axis="y", visible=False)
     return _save(fig, path)
