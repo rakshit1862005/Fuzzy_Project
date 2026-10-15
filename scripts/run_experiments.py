@@ -28,7 +28,7 @@ from glassbox.metrics import (  # noqa: E402
     probability_mae,
 )
 from glassbox.pipeline import BlackBox, fit_fuzzy_surrogate  # noqa: E402
-from glassbox.rules import partition_table, rule_table, rules_markdown  # noqa: E402
+from glassbox.rules import partition_table, rule_table, rule_text, rules_markdown  # noqa: E402
 from glassbox.surrogates import fit_tree_surrogate, tree_complexity, tree_rules_text  # noqa: E402
 
 OUT = config.RESULTS_DIR
@@ -89,7 +89,7 @@ def main(quick=False):
     report["blackbox"] = {"params": {"hidden_layer_sizes": list(nn_params["hidden_layer_sizes"]),
                                      "alpha": nn_params["alpha"]},
                           "description": bb.describe(), "test": nn_test, "logreg_test": lr_test}
-    (OUT / "nn_params.json").write_text(json.dumps(report["blackbox"]["params"], indent=2))
+    (OUT / "nn_params.json").write_text(json.dumps(report["blackbox"]["params"], indent=2), encoding="utf-8")
 
     # --------------------------------------------- 2. feature importance
     print("2/7 permutation importance ...")
@@ -116,7 +116,7 @@ def main(quick=False):
         "## Rules before simplification", "", rules_markdown(sur.full, Xtr), "",
         "## Simplification log", "", *[f"- {line}" for line in sur.simplify_log],
     ]
-    (OUT / "rules.md").write_text("\n".join(rules_doc) + "\n")
+    (OUT / "rules.md").write_text("\n".join(rules_doc) + "\n", encoding="utf-8")
 
     # --------------------------------------------------- 4. case studies
     print("4/7 case studies ...")
@@ -144,7 +144,7 @@ def main(quick=False):
         case_doc += [explanation_markdown(expl, title, true_label=data.y_test[i]), "",
                      f"![{name}](figures/case_{name}.png)", ""]
         plots.case_contributions(expl, FIG / f"case_{name}.png")
-    (OUT / "case_studies.md").write_text("\n".join(case_doc))
+    (OUT / "case_studies.md").write_text("\n".join(case_doc), encoding="utf-8")
 
     # ----------------------------------------------- 5. trade-off sweep
     print(f"5/7 trade-off sweep ({len(config.SWEEP_RULES)} sizes x {len(seeds)} seeds) ...")
@@ -182,11 +182,15 @@ def main(quick=False):
         "No oracle sampling": {"oracle_samples": 0},
         "No interpretability constraints": {"constrain": False},
         "Trained on true labels (not the network)": {"target": "truth"},
+        "First-order THEN-parts (linear formulas)": {"order": 1},
     }
     abl = []
+    first_order_example = None
     for label, kwargs in variants.items():
         for seed in seeds:
             s = fit_fuzzy_surrogate(data, bb, selected, seed=seed, **kwargs)
+            if kwargs.get("order") == 1 and first_order_example is None:
+                first_order_example = s.model
             ev = evaluate_surrogate(s, data, bb)["simplified"]
             drift = np.abs(s.full.centers_ - s.full.initial_centers_).max()
             order_ok = bool(np.all(np.diff(s.full.centers_, axis=1) > 0))
@@ -195,8 +199,10 @@ def main(quick=False):
     abl = pd.DataFrame(abl)
     abl.to_csv(OUT / "ablations.csv", index=False)
     abl_summary = (abl.groupby("variant", sort=False)
-                   .agg(fidelity=("fidelity", "mean"), accuracy=("accuracy", "mean"),
+                   .agg(fidelity=("fidelity", "mean"), fidelity_std=("fidelity", "std"),
+                        prob_mae=("prob_mae", "mean"), accuracy=("accuracy", "mean"),
                         rules=("rules", "mean"), conditions=("conditions", "mean"),
+                        then_parameters=("then_parameters", "mean"),
                         max_term_drift=("max_term_drift", "mean"),
                         ordered=("terms_stay_ordered", "mean"))
                    .reset_index())
@@ -231,6 +237,16 @@ def main(quick=False):
     fid_tbl = pd.DataFrame([{"stage": stage, **{k: main[stage][k] for k in (
         "rules", "conditions", "avg_rule_length", "fidelity", "fidelity_boundary",
         "fidelity_confident", "prob_mae")}} for stage in ("full", "simplified")])
+    # The same setting as the main model, but averaged over the sweep seeds, so that
+    # "before" and "after" pruning are compared like for like.
+    same = sweep[(sweep["target_rules"] == config.N_RULES)
+                 & sweep["method"].isin(["ANFIS (FCM rules)", "ANFIS simplified"])]
+    avg_tbl = pd.DataFrame([{
+        "stage": "before pruning" if method == "ANFIS (FCM rules)" else "after pruning",
+        "rules": f"{g['rules'].mean():.1f} ± {g['rules'].std():.1f}",
+        "conditions": f"{g['conditions'].mean():.1f} ± {g['conditions'].std():.1f}",
+        "fidelity": f"{g['fidelity'].mean():.3f} ± {g['fidelity'].std():.3f}",
+    } for method, g in same.groupby("method", sort=False)])
     best_curve = curve.copy()
     best_curve = best_curve[["method", "target_rules", "rules_mean", "conditions_mean",
                              "fidelity_mean", "fidelity_std", "accuracy_mean"]]
@@ -266,7 +282,15 @@ The fuzzy system uses the top {config.N_FEATURES}: **{', '.join(names)}**.
 
 ## 3. Fidelity of the fuzzy explainer (test set)
 
+**Main model** (the one shown in rules.md, case studies and the demo; seed {config.SEED}):
+
 {md_table(fid_tbl)}
+
+**Same setting averaged over {len(seeds)} other seeds** ({sorted(seeds)}; mean ± standard deviation).
+Compare these two rows with each other, not with the main model above: a single run
+can prune more or less aggressively than average.
+
+{md_table(avg_tbl)}
 
 - *fidelity* = share of test patients where fuzzy decision = network decision
 - *boundary / confident* = fidelity where the network's probability is within / outside 0.35-0.65
@@ -298,6 +322,10 @@ Classic grid-partition ANFIS on the same {len(selected)} inputs (every combinati
   so "Low" may no longer be low (see *max_term_drift*, as a fraction of the feature range).
 - **Trained on true labels** - fidelity to the network drops: imitating the network
   and solving the task are different goals.
+- **First-order THEN-parts** - each rule ends in a linear formula instead of one number
+  (*then_parameters* counts the numbers a reader has to take in after THEN). Example:
+
+  > {rule_text(first_order_example, 0) if first_order_example is not None else "n/a"}
 
 ## 6. Number of input features
 
@@ -314,9 +342,9 @@ FCM initialisation plus pruning keeps the rule base small regardless of k.
 ```
 {tree_rules_text(tree, names)}```
 """
-    (OUT / "summary.md").write_text(summary)
+    (OUT / "summary.md").write_text(summary, encoding="utf-8")
     report["ablations"] = abl_summary.to_dict(orient="records")
-    (OUT / "metrics.json").write_text(json.dumps(report, indent=2, default=float))
+    (OUT / "metrics.json").write_text(json.dumps(report, indent=2, default=float), encoding="utf-8")
     print(f"done in {time.time() - t0:.0f} s -> {OUT}")
 
 
