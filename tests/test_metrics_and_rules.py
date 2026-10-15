@@ -37,6 +37,17 @@ def test_explanation_contributions_sum_to_output():
     assert 0.0 < expl["match_strength"] <= 1.0
 
 
+def test_first_order_rule_text_uses_original_units():
+    rng = np.random.default_rng(0)
+    X = rng.uniform(0, 200, (300, 2))
+    y = np.clip(X[:, 0] / 200, 0, 1)
+    model = ANFIS(["Glucose", "BMI"], n_terms=2, rule_init="grid", epochs=20, order=1, ridge=1e-6).fit(X, y)
+    text = rule_text(model, 0)
+    assert "*Glucose" in text and "*BMI" in text
+    expl = explain_instance(model, X[0])
+    assert np.isclose(sum(r["contribution"] for r in expl["rules"]), model.predict_proba(X[:1])[0], atol=1e-9)
+
+
 def test_simplify_reduces_complexity_without_losing_fidelity():
     model, X, y = model_and_data()
     labels = y.astype(int)

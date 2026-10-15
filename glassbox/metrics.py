@@ -60,4 +60,5 @@ def anfis_complexity(model) -> dict:
         "avg_rule_length": float(used.sum(axis=1).mean()),
         "features_used": int(used.any(axis=0).sum()),
         "terms_per_feature": int(model.n_terms),
+        "then_parameters": int(np.size(model.consequents_)),   # numbers a reader must take in after THEN
     }

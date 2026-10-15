@@ -70,6 +70,17 @@ def test_analytic_gradient_matches_numerical():
                 assert grad[j, t] == pytest.approx(numeric, rel=1e-4, abs=1e-8)
 
 
+def test_first_order_rules_fit_a_linear_target_exactly():
+    rng = np.random.default_rng(0)
+    X = rng.uniform(0, 10, (300, 2))
+    y = 0.05 * X[:, 0] + 0.02 * X[:, 1]
+    zero = ANFIS(["a", "b"], n_terms=2, rule_init="grid", epochs=30).fit(X, y)
+    first = ANFIS(["a", "b"], n_terms=2, rule_init="grid", epochs=30, order=1, ridge=1e-6).fit(X, y)
+    assert first.consequents_.shape == (4, 3)
+    assert np.max(np.abs(first.predict_proba(X) - y)) < 1e-3
+    assert np.mean(np.abs(first.predict_proba(X) - y)) < np.mean(np.abs(zero.predict_proba(X) - y))
+
+
 def test_learns_a_threshold_rule():
     X, y = toy()
     model = ANFIS(["a", "b"], n_terms=2, rule_init="grid", epochs=150).fit(X, y)

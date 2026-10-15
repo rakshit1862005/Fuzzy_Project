@@ -65,6 +65,7 @@ def fit_fuzzy_surrogate(
     do_simplify=True,
     epochs=config.ANFIS_EPOCHS,
     fine_tune_epochs=config.FINE_TUNE_EPOCHS,
+    order=0,
     seed=config.SEED,
 ) -> FuzzySurrogate:
     """Train ANFIS to imitate the network (target="nn") or the true labels (target="truth").
@@ -97,7 +98,7 @@ def fit_fuzzy_surrogate(
 
     X_fit, X_val = X_fit[:, selected], X_val[:, selected]
     full = ANFIS(names, n_terms=n_terms, n_rules=n_rules, rule_init=rule_init,
-                 constrain=constrain, epochs=epochs, seed=seed).fit(X_fit, t_fit, X_val, t_val)
+                 constrain=constrain, epochs=epochs, order=order, seed=seed).fit(X_fit, t_fit, X_val, t_val)
     if not do_simplify:
         return FuzzySurrogate(selected, full, full, [])
     model, log = simplify(full, X_fit, t_fit, X_val, val_labels)

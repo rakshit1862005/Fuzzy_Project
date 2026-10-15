@@ -24,6 +24,7 @@ def explain_instance(model, x, nn_prob=None, top_k=None) -> dict:
     mu = model.memberships(x)[0]                    # (n_features, n_terms)
     w, wbar = model.firing_strengths(x)
     w, wbar = w[0], wbar[0]
+    f = model.rule_outputs(x)[0]                    # what each rule says for this patient
     output = float(model.predict_proba(x)[0])
 
     rules = []
@@ -39,8 +40,8 @@ def explain_instance(model, x, nn_prob=None, top_k=None) -> dict:
             ],
             "firing": float(w[r]),
             "weight": float(wbar[r]),
-            "consequent": float(model.consequents_[r]),
-            "contribution": float(wbar[r] * model.consequents_[r]),
+            "consequent": float(f[r]),
+            "contribution": float(wbar[r] * f[r]),
         })
     if top_k is not None:
         rules = rules[:top_k]

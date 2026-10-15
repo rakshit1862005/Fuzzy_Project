@@ -5,7 +5,9 @@ We use a zero-order Takagi-Sugeno system, so every rule has the form
     Rule r:  IF x_1 is A_r1 AND ... AND x_k is A_rk  THEN  y = p_r
 
 where p_r is a single number (the diabetes risk this rule predicts). This is
-far easier to read than first-order rules with a linear formula after THEN.
+far easier to read than first-order rules with a linear formula after THEN,
+    THEN y = b_r + a_r1 x_1 + ... + a_rk x_k,
+which are also supported (order=1) so the two can be compared experimentally.
 
 The five ANFIS layers, for one input vector x:
 
@@ -25,8 +27,9 @@ Hybrid learning (one epoch):
 Interpretability constraints after every update keep the terms meaningful:
 each centre may drift at most `max_shift` from its starting position (so
 "Low" stays low), centres stay sorted (Low < Medium < High) and neighbours
-keep at least half of their original distance, and each width stays between half and double its starting value (so no
-term shrinks to a spike or swallows its neighbours).
+keep at least half of their original distance, and each width stays between
+half and double its starting value (so no term shrinks to a spike or swallows
+its neighbours).
 
 All computations happen on inputs min-max scaled to [0, 1]; centres and widths
 are converted back to original units only for display.
@@ -77,8 +80,11 @@ class ANFIS:
         max_shift=0.1,
         sigma_range=(0.5, 2.0),
         threshold=config.DECISION_THRESHOLD,
+        order=0,
         seed=config.SEED,
     ):
+        if order not in (0, 1):
+            raise ValueError("order must be 0 (constant THEN-part) or 1 (linear THEN-part)")
         self.feature_names = list(feature_names)
         self.n_terms = n_terms
         self.term_names = term_names(n_terms)
@@ -93,6 +99,7 @@ class ANFIS:
         self.max_shift = max_shift
         self.sigma_range = sigma_range
         self.threshold = threshold
+        self.order = order
         self.seed = seed
 
     # ------------------------------------------------------------ scaling
@@ -132,31 +139,49 @@ class ANFIS:
         w = np.exp(log_w - log_w.max(axis=1, keepdims=True))
         return w / w.sum(axis=1, keepdims=True)
 
-    # ----------------------------------------------------- hybrid learning
-    def _solve_consequents(self, wbar, target):
-        """Least squares for p: minimise ||wbar p - t||^2 + ridge * ||p - prior||^2.
+    # ----------------------------------------------------- layers 4 - 5
+    def _rule_outputs(self, Xn):
+        """(n, R) output of every rule for every input: p_r, or b_r + a_r . x for order 1."""
+        if self.order == 0:
+            return np.broadcast_to(self.consequents_, (len(Xn), len(self.consequents_)))
+        return np.column_stack([Xn, np.ones(len(Xn))]) @ self.consequents_.T
 
-        The small ridge term acts like one imaginary patient of average risk
-        per rule, so a rule that almost never fires gets a neutral output
-        instead of an arbitrary one. Outputs are clipped to [0, 1] because
-        they are probabilities.
+    # ----------------------------------------------------- hybrid learning
+    def _solve_consequents(self, wbar, Xn, target):
+        """Least squares for the THEN-parts, with the IF-parts fixed.
+
+        Order 0: minimise ||wbar p - t||^2 + ridge * ||p - prior||^2. The small
+        ridge term acts like one imaginary patient of average risk per rule, so
+        a rule that almost never fires gets a neutral output instead of an
+        arbitrary one. Outputs are clipped to [0, 1] because they are
+        probabilities.
+        Order 1: the same, with one column per (rule, input) pair plus one per
+        rule for the intercept; coefficients are pulled towards 0.
         """
         R = wbar.shape[1]
-        lhs = wbar.T @ wbar + self.ridge * np.eye(R)
-        rhs = wbar.T @ target + self.ridge * self.prior_
-        return np.clip(np.linalg.solve(lhs, rhs), 0.0, 1.0)
+        if self.order == 0:
+            lhs = wbar.T @ wbar + self.ridge * np.eye(R)
+            rhs = wbar.T @ target + self.ridge * self.prior_
+            return np.clip(np.linalg.solve(lhs, rhs), 0.0, 1.0)
+        Z = np.column_stack([Xn, np.ones(len(Xn))])                      # (n, k + 1)
+        Phi = (wbar[:, :, None] * Z[:, None, :]).reshape(len(Xn), -1)    # (n, R * (k + 1))
+        prior = np.tile(np.r_[np.zeros(Z.shape[1] - 1), self.prior_], R)
+        lhs = Phi.T @ Phi + self.ridge * np.eye(Phi.shape[1])
+        rhs = Phi.T @ target + self.ridge * prior
+        return np.linalg.solve(lhs, rhs).reshape(R, Z.shape[1])
 
     def _premise_gradients(self, Xn, wbar, y, target):
         """dLoss/dc and dLoss/ds for the loss L = mean((y - t)^2), with p held fixed.
 
         Chain rule: dL/dtheta = sum_n sum_r G[n, r] * dlog(w_r)/dtheta, where
-            G[n, r] = 2/N * (y_n - t_n) * wn_r * (p_r - y_n)
+            G[n, r] = 2/N * (y_n - t_n) * wn_r * (f_r(x_n) - y_n)
+        and f_r is rule r's output (p_r for order 0)
         and for a Gaussian term used by rule r, with d = x - c:
             dlog(mu)/dc = d / s^2,     dlog(mu)/ds = d^2 / s^3
         (on the flat part of a shoulder d = 0, so the gradient is 0 there).
         """
-        p = self.consequents_
-        G = (2.0 / len(Xn)) * (y - target)[:, None] * wbar * (p[None, :] - y[:, None])
+        F = self._rule_outputs(Xn)
+        G = (2.0 / len(Xn)) * (y - target)[:, None] * wbar * (F - y[:, None])
         grad_c = np.zeros_like(self.centers_)
         grad_s = np.zeros_like(self.sigmas_)
         offsets = term_offsets(Xn, self.centers_)
@@ -240,8 +265,8 @@ class ANFIS:
         best = (np.inf, None)
         for _ in range(epochs):
             wbar = self._normalize(self._log_firing(Xn))
-            self.consequents_ = self._solve_consequents(wbar, target)        # forward pass
-            y = wbar @ self.consequents_
+            self.consequents_ = self._solve_consequents(wbar, Xn, target)    # forward pass
+            y = np.sum(wbar * self._rule_outputs(Xn), axis=1)
             self.history_["train"].append(float(np.mean((y - target) ** 2)))
             if has_val:
                 val_loss = float(np.mean((self._raw_output(Xn_val) - target_val) ** 2))
@@ -260,7 +285,11 @@ class ANFIS:
 
     # ----------------------------------------------------------- inference
     def _raw_output(self, Xn):
-        return self._normalize(self._log_firing(Xn)) @ self.consequents_
+        return np.sum(self._normalize(self._log_firing(Xn)) * self._rule_outputs(Xn), axis=1)
+
+    def rule_outputs(self, X):
+        """Layer 4 before weighting: what each rule says for each input."""
+        return np.array(self._rule_outputs(self._scale(X)))
 
     def predict_proba(self, X):
         """Layer 5 output, read as P(diabetic)."""
@@ -280,8 +309,9 @@ class ANFIS:
 
     # ------------------------------------------------- rule-base editing
     def refit_consequents(self, X, target):
-        wbar = self._normalize(self._log_firing(self._scale(X)))
-        self.consequents_ = self._solve_consequents(wbar, np.asarray(target, dtype=float))
+        Xn = self._scale(X)
+        wbar = self._normalize(self._log_firing(Xn))
+        self.consequents_ = self._solve_consequents(wbar, Xn, np.asarray(target, dtype=float))
         return self
 
     def with_antecedents(self, antecedents, X, target):
