@@ -22,8 +22,8 @@ Everything you need to present and defend the project. Read
 > functions. Constraints keep "Low", "Medium" and "High" meaningful. Finally we
 > prune every condition that is not needed.
 >
-> The result is a handful of short rules that agree with the network on about
-> 94 % of unseen patients. Any single prediction can be traced back to the rules
+> The result is 4 to 5 short rules that agree with the network on about
+> 92 to 95 % of unseen patients. Any single prediction can be traced back to the rules
 > that produced it. We also measure the trade-off between faithfulness and
 > simplicity and compare against a decision-tree explainer.
 
@@ -46,7 +46,8 @@ Everything you need to present and defend the project. Read
 
 1. `streamlit run app.py`, then open the **About** tab: what the black box is and
    what the explainer is.
-2. **Test-set patient 0** - read the two predictions and point at "Do they agree?".
+2. **Test-set patient 152** (a typical diabetic case) - read the two predictions
+   and point at "Do they agree?".
 3. **Why this decision?** tab:
    - the bar chart shows which rules carried the decision;
    - in the table, show that the *contributions add up exactly to the fuzzy risk*.
@@ -54,8 +55,11 @@ Everything you need to present and defend the project. Read
    partly "Medium" and partly "High" at the same time. That is fuzzy logic.
 5. Switch to **Enter values**. Raise Glucose step by step and watch the rule
    weights shift from "Glucose is Low" rules to "Glucose is High" rules.
-6. **All rules** tab - the full rule base fits on one screen.
-7. End on the trade-off plot in `results/figures/tradeoff.png`.
+6. **Test-set patient 108** - a weak-match warning appears. No rule describes
+   a 67-year-old with very high glucose and low BMI well, and the system says
+   so instead of pretending.
+7. **All rules** tab - the full rule base fits on one screen.
+8. End on the trade-off plot in `results/figures/tradeoff.png`.
 
 ---
 
@@ -74,8 +78,10 @@ Everything you need to present and defend the project. Read
 | Clustering inputs **and** the network output together | Clusters then group patients who look alike *and* get similar decisions. |
 | Hybrid learning (LSE + gradient descent) | The output is linear in the rule outputs, so they have an exact optimum. Only the membership functions need gradient descent. This is Jang's original ANFIS. |
 | Logarithms when multiplying memberships | A product of many small numbers underflows to 0; adding logs is the same maths, computed safely. |
-| Constraints on centres and widths | Without them, training can move "Low BMI" to BMI 44 or swap Low and High. Fidelity rises slightly, but the words become lies (see ablation). |
-| Oracle sampling | The network can label as many synthetic patients as we like, giving the surrogate more data (the TREPAN idea). |
+| Shoulder terms at both ends | Without them, a glucose of 200 would be *less* "High" than 155, because a bell curve falls off again. |
+| Constraints on centres and widths | Without them, terms drift by about half the input range and swap order (2 of 5 runs), so "Low" stops meaning low. Fidelity does not even improve (94.2 % vs 94.8 %), so the constraints cost nothing. |
+| Oracle sampling | The network can label as many synthetic patients as we like, giving the surrogate more data (the TREPAN idea). Adds 1.3 points of fidelity in the ablation. |
+| Match-strength flag | Normalised weights always sum to 1, so a rule can "win" even when it barely fits. Reporting the best raw firing strength exposes this. |
 | Pruning with two checks + fine-tuning | Pruning roughly halves the rule base or more. The probability-error check stops it pushing patients to the 0.5 edge, where they flip on new data. |
 | Decision-tree baseline at the same size | Answers "why not just use a tree?" with numbers. |
 | Implemented from scratch with NumPy | So every line can be explained in the viva. Gradients are verified numerically in the tests. |
@@ -95,6 +101,11 @@ Everything you need to present and defend the project. Read
 - **Fidelity is not truth.** If the network is wrong, a faithful explanation
   faithfully explains a wrong decision. That is the point: it lets a doctor
   *see* that the reasoning is wrong.
+- **Some patients have no good rule.** 15 % of test patients have a weak match
+  (best rule fires below 0.2). Their explanations are flagged, not hidden.
+- **Results vary a little with the random seed.** The main model (seed 42) has
+  92.2 % fidelity after pruning, while the 5-seed average for the same setting is 94.8 %.
+  That is why the trade-off study reports means and standard deviations.
 - **Not a medical tool.** The data are from one population of 768 women.
 
 ---
@@ -110,8 +121,8 @@ only as good as the network's.
 
 **2. Why train the fuzzy system on the network's outputs and not the real labels?**
 Because we want to explain the network. Trained on real labels, the fuzzy system
-would be a separate model that explains itself. Our ablation shows its fidelity
-to the network drops clearly.
+would be a separate model that explains itself. In our ablation its fidelity
+to the network drops from 94.8 % to 88.2 %.
 
 **3. Why not just use the fuzzy system and throw the network away?**
 In this project the network is the given model whose decisions need
@@ -211,9 +222,10 @@ differences.
 
 **21. What constraints do you apply and why?**
 After every step: (a) centres stay within ±10 % of the range of their starting
-point; (b) Low < Medium < High with a minimum gap; (c) widths stay between ½× and
-2× their start. Without them, the ablation shows terms drifting by more than
-half the range and swapping order. "Low" would no longer mean low.
+point; (b) Low < Medium < High, and neighbours keep at least half their initial
+distance; (c) widths stay between ½× and 2× their start. Without them, the
+ablation shows terms drifting by about half the range and swapping order in 2 of
+5 runs, with no gain in fidelity.
 
 **22. Why is the ridge term in least squares needed?**
 A rule that almost never fires has a near-zero column, so plain least squares
@@ -285,6 +297,24 @@ Yes. Every random step takes a seed (`config.py`), and
 `python scripts/run_experiments.py` regenerates every table and figure.
 
 **35. How long does it take to run?**
-Training the network plus the explainer takes about 30 seconds. The full
-experiment suite with 5 seeds takes about 10 to 15 minutes on a laptop
-(`--quick` for 1 seed).
+Training the network plus the explainer takes about 15 to 30 seconds. The full
+experiment suite with 5 seeds takes about 5 minutes on a laptop (`--quick` for
+1 seed).
+
+**36. What are shoulder membership functions?**
+The outer terms are flat beyond their centre: "Low" is 1 for every value below
+its centre and "High" is 1 for every value above. A plain Gaussian "High" would
+say a glucose of 200 is less High than 155, which is nonsense. Shoulders are
+standard practice in fuzzy controllers.
+
+**37. What is match strength and why do you need it?**
+The normalised weights always sum to 1, so some rule always "wins", even for a
+patient no rule fits. Match strength is the raw firing strength of the best
+rule, $\max_r w_r$. Below 0.2 we flag the explanation as weak. This happens for
+15 % of test patients, mostly unusual combinations such as very high glucose
+with low BMI in an elderly patient.
+
+**38. Your rules don't mention BloodPressure or Insulin. Is that wrong?**
+No. The network itself hardly uses them: together they account for under 8 % of
+its permutation importance. The rules describe what the network relies on,
+not textbook medicine.

@@ -61,6 +61,11 @@ terms, **Low, Medium, High**:
 
 $$\mu_{jt}(x_j) = \exp\left(-\frac{(x_j - c_{jt})^2}{2\sigma_{jt}^2}\right)$$
 
+**Shoulders:** the outer terms are flat beyond their centres. "Low" stays at
+μ = 1 for every value below its centre and "High" at μ = 1 above its centre, so
+a glucose of 200 is fully High rather than "less High than 155". In the formula,
+the offset $x_j - c_{jt}$ is set to 0 on the flat side.
+
 Initial centres sit at the 10 %, 50 % and 90 % quantiles of the training data;
 widths are set so that neighbouring terms cross at μ = 0.5
 (σ = gap / (2√(2 ln 2))). All rules **share** the same terms, so "Glucose is
@@ -125,7 +130,8 @@ information: they tell the surrogate how sure the network is.
 
 - each centre stays within ±0.1 of the input range of its starting position, so
   "Low" stays low;
-- centres stay ordered, Low < Medium < High, at least 0.05 apart;
+- centres stay ordered, Low < Medium < High, and neighbours keep at least half
+  of their initial distance, so two terms can never become the same;
 - each width stays between ½× and 2× its starting value.
 
 **Early stopping:** the parameters from the epoch with the lowest validation
@@ -151,8 +157,8 @@ squares), and the best one is kept if:
 
 The second check matters. Fidelity only counts flipped decisions, so without
 it pruning pushes many patients towards the 0.5 threshold, and those flip on
-new data. Without the check, test fidelity after pruning averaged 92 % instead
-of 94 %. Rules that become identical are merged. Finally the pruned rule base
+new data. In development runs without the check, test fidelity after pruning
+averaged 92 % instead of 94 %. Rules that become identical are merged. Finally the pruned rule base
 is fine-tuned for 100 more epochs under the same constraints.
 
 ## 9. Explanations (`glassbox/explain.py`, `glassbox/rules.py`)
@@ -161,6 +167,11 @@ Because $y = \sum_r \bar w_r p_r$, the contribution of rule r to a prediction is
 exactly $\bar w_r p_r$. These contributions sum to the output, so an explanation
 lists the strongest rules, the membership degree of each of their conditions,
 and their share of the final risk. Nothing is left unexplained.
+
+Normalised weights always sum to 1, even for an unusual patient whom no rule
+describes well. Each explanation therefore also reports the **match strength**,
+$\max_r w_r$ (the raw firing strength of the best rule). Below 0.2 the
+explanation is flagged as weak; 15 % of test patients fall in this group.
 
 ## 10. Evaluation (`glassbox/metrics.py`, `scripts/run_experiments.py`)
 
