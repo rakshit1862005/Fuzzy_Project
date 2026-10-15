@@ -113,10 +113,17 @@ install it from [git-scm.com](https://git-scm.com/downloads).
 ### 2. Download the project
 
 ```bash
-git clone https://github.com/rakshit1862005/Fuzzy_Project.git
+git clone -b claude/laughing-lamport-1fbce2 https://github.com/rakshit1862005/Fuzzy_Project.git
 cd Fuzzy_Project
-git checkout claude/laughing-lamport-1fbce2    # skip once this is merged into main
 ```
+
+`-b` picks the branch that holds the project (drop it once this is merged into
+`main`). The repository is public, so no login is needed. If the clone fails
+with *"Invalid username or token"*, see the first row of the troubleshooting
+table.
+
+No Git? Download the ZIP instead, extract it and `cd` into the extracted folder:
+<https://github.com/rakshit1862005/Fuzzy_Project/archive/refs/heads/claude/laughing-lamport-1fbce2.zip>
 
 ### 3. Create a virtual environment (a private folder of packages for this project)
 
@@ -175,6 +182,7 @@ ones; library versions can change the last digit.
 
 | Problem | Fix |
 |---|---|
+| `git clone` fails: *Invalid username or token. Password authentication is not supported* | An old GitHub login is saved on your computer and gets rejected. Clone without it: `git -c credential.helper= clone -b claude/laughing-lamport-1fbce2 https://github.com/rakshit1862005/Fuzzy_Project.git`. To remove the old login for good (Windows): Control Panel → Credential Manager → Windows Credentials → remove the `github.com` entries. |
 | `python` is not recognised (Windows) | Use `py` instead of `python`, or reinstall Python with "Add to PATH" ticked. |
 | `Activate.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then activate again. Or use Command Prompt: `.venv\Scripts\activate.bat`. |
 | `streamlit` is not recognised | Use `python -m streamlit run app.py`, and check that `(.venv)` is active. |
