@@ -29,10 +29,11 @@
       "avg_rule_length": 4.0,
       "features_used": 4,
       "terms_per_feature": 3,
+      "then_parameters": 8,
       "fidelity": 0.948051948051948,
       "fidelity_boundary": 0.8285714285714286,
       "fidelity_confident": 0.9831932773109243,
-      "prob_mae": 0.05924382524747048,
+      "prob_mae": 0.05924382524747053,
       "accuracy": 0.7012987012987013
     },
     "simplified": {
@@ -41,10 +42,11 @@
       "avg_rule_length": 3.0,
       "features_used": 4,
       "terms_per_feature": 3,
+      "then_parameters": 4,
       "fidelity": 0.922077922077922,
       "fidelity_boundary": 0.7142857142857143,
       "fidelity_confident": 0.9831932773109243,
-      "prob_mae": 0.0723664306684383,
+      "prob_mae": 0.07236643066843829,
       "accuracy": 0.7012987012987013
     }
   },
@@ -52,37 +54,61 @@
     {
       "variant": "Full method",
       "fidelity": 0.9480519480519481,
+      "fidelity_std": 0.01124708316603169,
+      "prob_mae": 0.06290293498555917,
       "accuracy": 0.7064935064935065,
       "rules": 5.0,
       "conditions": 12.8,
+      "then_parameters": 5.0,
       "max_term_drift": 0.10000000000000002,
       "ordered": 1.0
     },
     {
       "variant": "No oracle sampling",
       "fidelity": 0.935064935064935,
+      "fidelity_std": 0.0,
+      "prob_mae": 0.06069293510123373,
       "accuracy": 0.7012987012987013,
       "rules": 5.0,
       "conditions": 11.0,
+      "then_parameters": 5.0,
       "max_term_drift": 0.1,
       "ordered": 1.0
     },
     {
       "variant": "No interpretability constraints",
       "fidelity": 0.9415584415584416,
+      "fidelity_std": 0.007952888775270088,
+      "prob_mae": 0.05806931541327397,
       "accuracy": 0.7155844155844155,
       "rules": 4.2,
       "conditions": 12.4,
-      "max_term_drift": 0.4953857388907223,
+      "then_parameters": 4.2,
+      "max_term_drift": 0.4953857388906776,
       "ordered": 0.6
     },
     {
       "variant": "Trained on true labels (not the network)",
       "fidelity": 0.8818181818181818,
+      "fidelity_std": 0.010669919951399374,
+      "prob_mae": 0.12129719949536086,
       "accuracy": 0.7363636363636363,
       "rules": 4.4,
       "conditions": 11.2,
+      "then_parameters": 4.4,
       "max_term_drift": 0.08003118899122498,
+      "ordered": 1.0
+    },
+    {
+      "variant": "First-order THEN-parts (linear formulas)",
+      "fidelity": 0.9428571428571428,
+      "fidelity_std": 0.009631426606617706,
+      "prob_mae": 0.0546391620735327,
+      "accuracy": 0.7116883116883116,
+      "rules": 3.6,
+      "conditions": 5.2,
+      "then_parameters": 18.0,
+      "max_term_drift": 0.10000000000000002,
       "ordered": 1.0
     }
   ]
