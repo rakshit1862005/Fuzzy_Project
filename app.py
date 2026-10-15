@@ -2,7 +2,7 @@
 
     streamlit run app.py
 
-Pick a test patient (or type in your own values) and see the neural network's
+Pick a test patient, drag the sliders, and see the neural network's
 prediction next to the fuzzy rules that explain it. For teaching only - this
 is not a medical tool.
 """
@@ -24,7 +24,7 @@ st.set_page_config(page_title="Glass-Box Insight", layout="wide")
 @st.cache_resource(show_spinner="Training the neural network and the fuzzy explainer (about a minute) ...")
 def build():
     params_file = config.RESULTS_DIR / "nn_params.json"
-    params = json.loads(params_file.read_text()) if params_file.exists() else None
+    params = json.loads(params_file.read_text(encoding="utf-8")) if params_file.exists() else None
     return train_glassbox(nn_params=params)
 
 
@@ -37,23 +37,31 @@ st.caption("A neural network predicts diabetes; a fuzzy IF-THEN rule base explai
            "Educational demo on the Pima Indians Diabetes dataset - not medical advice.")
 
 # ------------------------------------------------------------------ input
+X_all = np.vstack([data.X_train, data.X_val, data.X_test])
+lo, hi = X_all.min(axis=0), X_all.max(axis=0)
+STEP = {"BMI": 0.1, "DiabetesPedigreeFunction": 0.001, "Insulin": 0.5, "SkinThickness": 0.5}
+
 with st.sidebar:
     st.header("Patient")
-    mode = st.radio("Input", ["Test-set patient", "Enter values"], horizontal=True)
-    if mode == "Test-set patient":
-        i = st.number_input(f"Patient index (0 - {len(data.y_test) - 1})", 0, len(data.y_test) - 1, 0)
-        x = data.X_test[i].copy()
-        st.write(f"Actual outcome: **{config.CLASS_NAMES[data.y_test[i]]}**")
-        st.dataframe(pd.DataFrame({"value": x}, index=data.feature_names))
-    else:
-        x = np.empty(len(data.feature_names))
-        lo, hi = data.X_train.min(axis=0), data.X_train.max(axis=0)
-        median = np.median(data.X_train, axis=0)
-        for j, name in enumerate(data.feature_names):
-            unit = config.UNITS[name]
-            label = f"{name}{' (' + unit + ')' if unit else ''}" + ("  - used by fuzzy rules" if j in selected else "")
-            step = 0.01 if name == "DiabetesPedigreeFunction" else 1.0
-            x[j] = st.slider(label, float(lo[j]), float(hi[j]), float(round(median[j], 2)), step=step)
+    choices = ["Typical patient (training medians)"] + [
+        f"Test patient #{i} ({config.CLASS_NAMES[y]})" for i, y in enumerate(data.y_test)]
+    choice = st.selectbox("Start from", range(len(choices)), index=153,
+                          format_func=lambda k: choices[k],
+                          help="Pick a patient, then drag the sliders to see how the rules react.")
+    start = np.median(data.X_train, axis=0) if choice == 0 else data.X_test[choice - 1]
+
+    x = np.empty(len(data.feature_names))
+    for j, name in enumerate(data.feature_names):
+        unit = config.UNITS[name]
+        label = f"{name}{' (' + unit + ')' if unit else ''}" + ("  - used by the rules" if j in selected else "")
+        # The key includes the chosen patient, so picking a new patient resets the sliders.
+        x[j] = st.slider(label, float(lo[j]), float(hi[j]), float(start[j]),
+                         step=STEP.get(name, 1.0), key=f"{name}-{choice}")
+
+    if choice > 0:
+        edited = not np.allclose(x, start)
+        st.write(f"Actual outcome: **{config.CLASS_NAMES[data.y_test[choice - 1]]}**"
+                 + (" (values edited, so this no longer applies)" if edited else ""))
 
 # ---------------------------------------------------------------- outputs
 nn_prob = float(bb.predict_proba(x[None])[0])
@@ -67,8 +75,13 @@ c3.metric("Do they agree?", "Yes" if expl["agree"] else "No",
           delta_color="off")
 
 if expl["weak_match"]:
-    st.warning(f"Weak match: the best rule fits this patient only to degree {expl['match_strength']:.2f}. "
-               "The rule base has no good description of such a patient, so treat the explanation with care.")
+    st.warning(f"Weak match ({expl['match_strength']:.2f}): no rule describes this patient well, "
+               "so treat the explanation with care.")
+elif expl["match_strength"] < 0.5:
+    st.info(f"Partial match ({expl['match_strength']:.2f}): the patient sits between rules, "
+            "so several rules share the decision.")
+else:
+    st.success(f"Good match ({expl['match_strength']:.2f}): one rule describes this patient well.")
 
 why, rules_tab, terms_tab, about = st.tabs(["Why this decision?", "All rules", "Linguistic terms", "About"])
 
