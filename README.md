@@ -19,28 +19,45 @@ _Course project for Fuzzy Logic and Neural Networks (B.Tech, final year)._
 
 Test set of 154 patients that were never used for training, tuning or pruning.
 
-| | Result |
-|---|---|
-| Black-box network (MLP 8→8→1) | 70.1 % accuracy, ROC-AUC 0.80 (logistic regression: 70.8 %, 0.82) |
-| Fuzzy explainer, before pruning | 8 rules, 32 conditions, **94.8 % fidelity** to the network |
-| Fuzzy explainer, after pruning | 4 rules, 12 conditions, **92.2 % fidelity** |
-| Same setting averaged over 5 seeds | pruning: 26.4 → 12.8 conditions, fidelity 95.1 % → 94.8 % |
-| Decision-tree explainer, 8 leaves | 25 conditions, 90.9 % fidelity |
-| Grid ANFIS (all combinations) | 81 rules, 324 conditions, 94.2 % fidelity |
+**The black box:** an MLP (8→8→1) with 70.1 % accuracy and ROC-AUC 0.80
+(logistic regression: 70.8 %, 0.82).
+
+**The fuzzy explainer**, fidelity = share of test patients where it makes the
+same decision as the network:
+
+| | Rules | Conditions | Fidelity |
+|---|---|---|---|
+| Main model (seed 42), before pruning | 8 | 32 | 94.8 % |
+| Main model (seed 42), after pruning | 4 | 12 | 92.2 % |
+| 5 other seeds, before pruning (mean ± sd) | 6.6 ± 0.9 | 26.4 ± 3.6 | 95.1 % ± 0.7 |
+| 5 other seeds, after pruning (mean ± sd) | 5.0 ± 1.6 | 12.8 ± 5.0 | 94.8 % ± 1.1 |
+
+Compare rows within the same seeds. The main model is the one shown in the rules,
+case studies and demo; it happened to prune harder than average.
+
+**Baselines at equal size:**
+
+| Explainer | Rules | Conditions | Fidelity |
+|---|---|---|---|
+| Decision tree, 4 leaves | 4 | 8 | 87.7 % |
+| Decision tree, 5 leaves | 5 | 12 | 90.3 % |
+| Grid ANFIS (every term combination) | 81 | 324 | 94.2 % |
 
 Findings:
 
-- **Pruning roughly halves the rule base** with almost no loss of fidelity (seed average).
-- **At every rule-base size the fuzzy explainer is more faithful than a decision
-  tree** of the same size.
+- **Pruning roughly halves the rule base** (26 → 13 conditions on average) for
+  about 0.3 points of fidelity.
+- **At equal size the fuzzy explainer is more faithful than a decision tree.**
 - **Interpretability constraints are free:** removing them does not raise fidelity
   (94.2 % vs 94.8 %), but terms then drift by about half the input range and
   swap order in 2 of 5 runs, so "Low" stops meaning low.
 - **Imitating the network matters:** the same system trained on true labels agrees
   with the network only 88.2 % of the time.
+- **Constant THEN-parts are enough:** linear (first-order) THEN-parts were not more
+  faithful (94.3 %) and need 18 numbers after THEN instead of 5.
 - **Oracle sampling** (synthetic patients labelled by the network) adds 1.3
   points of fidelity.
-- The explainer is honest about its limits: 15 % of test patients have no
+- **The explainer is honest about its limits:** 15 % of test patients have no
   well-matching rule, and their explanations are flagged as weak.
 
 Full tables: [results/summary.md](results/summary.md) · rules:
@@ -76,19 +93,94 @@ flowchart LR
 
 The equations are in [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
 
-## Quick start
+## Setting up on your computer
+
+You need **Python 3.10 or newer** (tested on 3.10 and 3.13) and **Git**. No GPU;
+any laptop works. Everything below is typed in a terminal: *PowerShell* on
+Windows, *Terminal* on macOS or Linux.
+
+### 1. Check Python and Git
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-
-python -m pytest                   # 20 unit tests, a few seconds
-python scripts/run_experiments.py  # all results -> results/ (~5 min; --quick for 1 seed)
-streamlit run app.py               # interactive demo in the browser
+python --version      # Windows: if this fails, try  py --version
+git --version
 ```
 
-Python 3.9+ is required. No GPU is needed; everything runs on a laptop CPU.
+If Python is missing, install it from [python.org](https://www.python.org/downloads/).
+On Windows, tick **"Add python.exe to PATH"** in the installer. If Git is missing,
+install it from [git-scm.com](https://git-scm.com/downloads).
+
+### 2. Download the project
+
+```bash
+git clone https://github.com/rakshit1862005/Fuzzy_Project.git
+cd Fuzzy_Project
+git checkout claude/laughing-lamport-1fbce2    # skip once this is merged into main
+```
+
+### 3. Create a virtual environment (a private folder of packages for this project)
+
+Windows (PowerShell):
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+macOS / Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Your prompt now starts with `(.venv)`. Run the activate line again every time
+you open a new terminal.
+
+### 4. Install the packages
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 5. Check that everything works
+
+```bash
+python -m pytest
+```
+
+Expected: `22 passed` in a few seconds.
+
+### 6. Start the demo
+
+```bash
+python -m streamlit run app.py
+```
+
+Your browser opens at <http://localhost:8501>. The first load takes 15-30
+seconds while the models train. Stop the app with `Ctrl+C` in the terminal.
+
+### 7. (Optional) Regenerate all results
+
+```bash
+python scripts/run_experiments.py           # about 5-10 minutes
+python scripts/run_experiments.py --quick   # 1 seed instead of 5, about 2 minutes
+```
+
+This rewrites everything in `results/`. The numbers should match the committed
+ones; library versions can change the last digit.
+
+### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `python` is not recognised (Windows) | Use `py` instead of `python`, or reinstall Python with "Add to PATH" ticked. |
+| `Activate.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then activate again. Or use Command Prompt: `.venv\Scripts\activate.bat`. |
+| `streamlit` is not recognised | Use `python -m streamlit run app.py`, and check that `(.venv)` is active. |
+| `ModuleNotFoundError: No module named 'glassbox'` | Run commands from the `Fuzzy_Project` folder (the one containing `app.py`). |
+| `Port 8501 is already in use` | `python -m streamlit run app.py --server.port 8502` |
+| VS Code shows import errors | `Ctrl+Shift+P` → *Python: Select Interpreter* → pick the one inside `.venv`. |
 
 ![demo](docs/app_screenshot.png)
 
@@ -119,7 +211,7 @@ results/                generated tables, rules, case studies, figures
 docs/
   PROBLEM_STATEMENT.md  revised problem statement, related work, references
   METHODOLOGY.md        every step with equations (report-ready)
-  VIVA_GUIDE.md         pitch, team split, demo script, 38 Q&A
+  VIVA_GUIDE.md         pitch, team split, demo script, 42 Q&A
 data/diabetes.csv       Pima Indians Diabetes dataset
 ```
 
