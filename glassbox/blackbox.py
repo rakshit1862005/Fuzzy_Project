@@ -34,9 +34,12 @@ class StreamingMLP(MLPClassifier):
 
 
 def make_mlp(hidden_layer_sizes=(16, 8), alpha=1e-3, seed=config.SEED) -> Pipeline:
-    """Standardise inputs, then a ReLU MLP trained with Adam for a fixed number of epochs.
+    """Standardise inputs, then a ReLU MLP trained with Adam.
 
-    `alpha` is the L2 weight penalty that controls overfitting. We tried
+    Training stops when the *training* loss has not improved by at least
+    1e-4 for 10 consecutive epochs (scikit-learn's default `tol` and
+    `n_iter_no_change`), or after 500 epochs at most. `alpha` is the L2
+    weight penalty that controls overfitting. We tried validation-based
     early stopping first, but with only ~460 training patients its held-out
     slice (~70 patients) was too small and made results jump between runs.
     """

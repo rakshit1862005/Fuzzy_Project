@@ -102,7 +102,7 @@ fidelity-vs-size plot next to their decision trees.
 |---|---|
 | Pima diabetes dataset | All 8 inputs are numeric and medically meaningful, so they suit fuzzy terms. Small enough to train in seconds. |
 | Median imputation of impossible zeros, fitted on training data only | A glucose of 0 is "not measured", not a real value. Fitting on training data only prevents test-set leakage. |
-| Network tuned by 5-fold CV, no early stopping | Early stopping's hold-out was only about 70 patients and made results unstable. Fixed epochs plus L2 gave stable CV scores. |
+| Network tuned by 5-fold CV, no early stopping | Early stopping's hold-out was only about 70 patients and made results unstable. Stopping when the training loss levels off (at most 500 epochs; 321 in practice) plus L2 gave stable CV scores. |
 | Surrogate learns the network's **probability** | It explains the network, not the disease. Probabilities also tell the surrogate how confident the network is. |
 | Only the top 4 inputs (permutation importance) | Rules with 8 conditions are unreadable. The top 4 carry most of what the network uses. |
 | Zero-order Takagi-Sugeno | "THEN risk = 0.85" is readable; a linear formula is not. We measured the alternative: first-order rules were *not* more faithful (94.3 % vs 94.8 %) and needed 18 numbers after THEN instead of 5. |
@@ -314,6 +314,11 @@ unequal sizes:
 The fuzzy rules also give graded outputs instead of hard thresholds. Our
 explanation for the gap (not proven): smooth, overlapping terms follow the
 network's smooth decision surface better than axis-aligned cuts.
+
+Two caveats to state: on 154 patients a single comparison is not statistically
+significant (McNemar p = 0.21 at 4 rules; the lead is consistent across all nine
+sizes), and the tree was trained on the 460 real patients' hard labels while
+ANFIS used 2,460 points with soft targets.
 
 **29. Where does the fuzzy system disagree with the network?**
 Mostly near the network's decision boundary (probability 0.35 to 0.65); see
