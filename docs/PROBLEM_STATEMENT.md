@@ -41,7 +41,8 @@ fuzzy system $f_{FIS}: X \to [0,1]$ such that
 ## Scope
 
 - Dataset: Pima Indians Diabetes (768 patients, 8 numeric features).
-- Software only: Python, NumPy, scikit-learn, Matplotlib, Streamlit.
+- Software only: Python, NumPy, scikit-learn and Matplotlib for the models; a
+  FastAPI server with a plain HTML/JavaScript page for the live demo.
 - ANFIS, Fuzzy C-Means, rule pruning and explanations are implemented from
   scratch so that every step can be explained.
 - This is a course project: it is not a medical tool and makes no clinical claims.

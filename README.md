@@ -15,6 +15,35 @@ prediction can then be traced to the rules that produced it, for example:
 
 _Course project for Fuzzy Logic and Neural Networks (B.Tech, final year)._
 
+## The live lab
+
+```bash
+python -m webapp        # opens http://127.0.0.1:8000
+```
+
+Nothing in the lab is precomputed. Every press of **Train** trains a new neural
+network and a new fuzzy system from the raw CSV with the settings you choose,
+and you watch each step as it happens:
+
+1. **Train**: the network's loss falls epoch by epoch (or the 16 cross-validation
+   scores fill in), the importance bars appear, Fuzzy C-Means proposes rules,
+   ANFIS reshapes the Low/Medium/High terms (dashed = starting position), and
+   pruning deletes conditions one at a time. About 15 s in slow motion, 5 s without.
+2. **Explore**: pick a test patient or drag any slider. Both models answer
+   instantly, the fired rules and their contributions update, and the patient's
+   value moves across the membership curves.
+3. **Edit rules**: click a condition to change its term, × to delete it, + to add
+   one. Least squares re-fits the THEN-parts and the test-set fidelity updates
+   immediately.
+4. **Compare runs**: every run, and every manual edit, on a fidelity-vs-size plot
+   next to a decision tree of the same size.
+
+With the default settings the lab reproduces the report's main model exactly
+(4 rules, 12 conditions, 92.2 % fidelity).
+
+![training live](docs/lab_train.png)
+![exploring a patient](docs/lab_explore.png)
+
 ## Headline results
 
 Test set of 154 patients that were never used for training, tuning or pruning.
@@ -161,16 +190,17 @@ python -m pip install -r requirements.txt
 python -m pytest
 ```
 
-Expected: `22 passed` in a few seconds.
+Expected: `26 passed` in a few seconds.
 
-### 6. Start the demo
+### 6. Start the live lab
 
 ```bash
-python -m streamlit run app.py
+python -m webapp
 ```
 
-Your browser opens at <http://localhost:8501>. The first load takes 15-30
-seconds while the models train. Stop the app with `Ctrl+C` in the terminal.
+Your browser opens at <http://127.0.0.1:8000> (if it doesn't, open that address
+yourself). Press **Train**. Stop the server with `Ctrl+C` in the terminal. The lab
+needs no internet connection.
 
 ### 7. (Optional) Regenerate all results
 
@@ -189,12 +219,12 @@ ones; library versions can change the last digit.
 | `git clone` fails: *Invalid username or token. Password authentication is not supported* | (1) Make sure the owner invited your GitHub account and you accepted. (2) Remove the old saved login: `cmdkey /delete:git:https://github.com` (Windows), or Control Panel → Credential Manager → Windows Credentials → remove the `github.com` entries. (3) Clone again and sign in through the browser window, or paste a personal access token as the password. |
 | `python` is not recognised (Windows) | Use `py` instead of `python`, or reinstall Python with "Add to PATH" ticked. |
 | `Activate.ps1 cannot be loaded because running scripts is disabled` | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then activate again. Or use Command Prompt: `.venv\Scripts\activate.bat`. |
-| `streamlit` is not recognised | Use `python -m streamlit run app.py`, and check that `(.venv)` is active. |
-| `ModuleNotFoundError: No module named 'glassbox'` | Run commands from the `Fuzzy_Project` folder (the one containing `app.py`). |
-| `Port 8501 is already in use` | `python -m streamlit run app.py --server.port 8502` |
+| `No module named fastapi` or `uvicorn` | The packages are not installed in the active environment: check that `(.venv)` is shown, then repeat step 4. |
+| `ModuleNotFoundError: No module named 'glassbox'` or `'webapp'` | Run commands from the `Fuzzy_Project` folder (the one containing `README.md`). |
+| `address already in use` / port 8000 busy | `python -m webapp --port 8001` |
+| The page says "Server not reachable" | The terminal running `python -m webapp` was closed or stopped; start it again. |
 | VS Code shows import errors | `Ctrl+Shift+P` → *Python: Select Interpreter* → pick the one inside `.venv`. |
 
-![demo](docs/app_screenshot.png)
 
 ## Repository layout
 
@@ -215,15 +245,18 @@ glassbox/               the library
   rules.py              rules as sentences and tables
   explain.py            per-patient explanations
   plots.py              figures
-  pipeline.py           end-to-end training used by the script and the app
+  pipeline.py           end-to-end training used by the script and the lab
 scripts/run_experiments.py   reproduces every number and figure
-app.py                  Streamlit demo
-tests/                  unit tests (incl. numerical gradient check)
+webapp/                 the live lab
+  server.py             FastAPI endpoints (start a run, stream events, predict, edit rules)
+  jobs.py               runs the pipeline in a thread and records an event at every step
+  static/               the page: index.html, style.css, app.js, charts.js (no build step)
+tests/                  unit tests (incl. numerical gradient check and the lab's API)
 results/                generated tables, rules, case studies, figures
 docs/
   PROBLEM_STATEMENT.md  revised problem statement, related work, references
   METHODOLOGY.md        every step with equations (report-ready)
-  VIVA_GUIDE.md         pitch, team split, demo script, 42 Q&A
+  VIVA_GUIDE.md         pitch, team split, demo script, 45 Q&A
 data/diabetes.csv       Pima Indians Diabetes dataset
 ```
 

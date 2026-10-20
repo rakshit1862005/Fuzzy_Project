@@ -36,40 +36,63 @@ Everything you need to present and defend the project. Read
 | A | Data and neural network | `data.py`, `blackbox.py`, `feature_selection.py` | imputation without leakage, MLP + backprop + Adam, L2 regularisation, cross-validation, permutation importance |
 | B | Fuzzy foundations | `membership.py`, `fcm.py`, `rulebase.py` | fuzzy sets vs crisp sets, Gaussian MFs, linguistic terms, FCM update equations, why grid partition explodes |
 | C | ANFIS | `anfis.py`, `simplify.py` | the 5 layers, Takagi-Sugeno rules, hybrid learning, gradient derivation, constraints, pruning |
-| D | Evaluation and demo | `metrics.py`, `explain.py`, `oracle.py`, `surrogates.py`, `run_experiments.py`, `app.py` | fidelity vs accuracy, trade-off plot, ablations, decision-tree baseline, case studies, live demo |
+| D | Evaluation and demo | `metrics.py`, `explain.py`, `oracle.py`, `surrogates.py`, `run_experiments.py`, `webapp/` | fidelity vs accuracy, trade-off plot, ablations, decision-tree baseline, case studies, how the live lab streams training |
 
 **Everyone** should know the pitch, the headline numbers, and questions 1 to 10 below.
 
 ---
 
-## 3. Demo script (5 minutes)
+## 3. Demo script (5-7 minutes)
 
-1. `python -m streamlit run app.py`, then open the **About** tab: what the black
-   box is and what the explainer is.
-2. The app opens on **test patient #152** (glucose 184, BMI 37, age 31). Both
-   models say 0.84, and the green badge shows one rule fits this patient well.
-3. **Why this decision?** tab:
-   - the bar chart shows rule R4 ("Glucose is High AND BMI is Medium AND Age is
-     Medium") carrying 98 % of the decision;
-   - in the table, show that the *contributions add up exactly to the fuzzy risk*.
-4. **Linguistic terms** tab - the orange line is the patient. Show how a value is
-   partly "Medium" and partly "High" at the same time. That is fuzzy logic.
-5. Drag the **Glucose** slider down and narrate (measured values):
+Start the lab with `python -m webapp` before the viva; it needs no internet.
 
-   | Glucose | Network | Fuzzy | Rule with the largest weight |
-   |---|---|---|---|
-   | 184 | 0.84 | 0.84 | R4 Glucose High (0.98) |
-   | 150 | 0.66 | 0.66 | R4 Glucose High (0.49), R2 Glucose Medium (0.30) |
-   | 130 | 0.46 | 0.51 | R2 Glucose Medium (0.49) - *the two disagree here* |
-   | 110 | 0.26 | 0.33 | R1 Glucose Low (0.41), R2 (0.38) |
+**Part 1 - train it live (Train tab).** The settings are the report's. Keep
+*Slow motion* ticked and press **Train**. Narrate each panel as it fills (about
+15 seconds in total):
 
-   At 130 the patient sits on the network's decision boundary, and that is
-   exactly where the fuzzy system disagrees. That makes a good talking point.
-6. Pick **test patient #108** from the list. A weak-match warning appears: no
-   rule describes a 67-year-old with very high glucose and low BMI well, and the
-   system says so instead of pretending.
-7. **All rules** tab - the full rule base fits on one screen.
-8. End on the trade-off plot in `results/figures/tradeoff.png`.
+1. *Neural network learns*: the loss falls epoch by epoch. That is
+   backpropagation with Adam. Validation accuracy is shown next to it.
+2. *What the network relies on*: shuffle one input and see how far the output
+   moves. Glucose dominates; the four blue inputs go to the fuzzy system.
+3. *Rule base*: Fuzzy C-Means proposes 8 rules, written in words.
+4. *ANFIS learns*: the loss falls and the Low/Medium/High curves move a little
+   away from their dashed starting positions. The constraints stop them moving
+   further.
+5. *Pruning*: conditions disappear one at a time (32 → 12), each edit keeping
+   fidelity within 1 point.
+6. *Result*: 92.2 % fidelity on 154 unseen patients with 4 rules. A decision tree
+   of the same size gets 87.7 %.
+
+**Part 2 - explain one patient (Explore tab).** It opens on **test patient #152**
+(glucose 184, BMI 37, age 31). Both models say 0.84. Rule R4 ("Glucose is High
+AND BMI is Medium AND Age is Medium") carries 98 % of the decision, and the
+contributions add up exactly to the fuzzy risk. Then drag the **Glucose** slider
+down (measured values):
+
+| Glucose | Network | Fuzzy | Rule with the largest weight |
+|---|---|---|---|
+| 184 | 0.84 | 0.84 | R4 Glucose High (0.98) |
+| 150 | 0.66 | 0.66 | R4 Glucose High (0.49), R2 Glucose Medium (0.30) |
+| 130 | 0.46 | 0.51 | R2 Glucose Medium (0.49) - *the two disagree here* |
+| 110 | 0.26 | 0.33 | R1 Glucose Low (0.41), R2 (0.38) |
+
+At 130 the patient sits on the network's decision boundary, which is exactly
+where the fuzzy system disagrees. That makes a good talking point. In the
+membership charts the orange line is the patient: one value is partly "Medium"
+and partly "High" at the same time, which is fuzzy logic.
+
+Pick **test patient #108**: a weak-match warning appears. No rule describes a
+67-year-old with very high glucose and low BMI well, and the system says so.
+
+**Part 3 - let the examiner edit the rules (Edit rules tab).** Delete
+"Glucose is Low" from R1: fidelity drops from 92.2 % to 89.0 % immediately,
+because that condition was doing real work. Press *Reset to trained rules*.
+Invite the examiner to delete or change any condition.
+
+**Part 4 - let the examiner change a setting.** For example, untick *Keep terms
+meaningful*, or set *Imitate* to *The true diagnosis*, untick *Slow motion*, and
+train again (about 5 seconds). Open **Compare runs** to see both runs on the
+fidelity-vs-size plot next to their decision trees.
 
 ---
 
@@ -323,9 +346,10 @@ Yes. Every random step takes a seed (`config.py`), and
 `python scripts/run_experiments.py` regenerates every table and figure.
 
 **35. How long does it take to run?**
-Training the network plus the explainer takes about 15 to 30 seconds. The full
-experiment suite with 5 seeds takes about 5 minutes on a laptop (`--quick` for
-1 seed).
+One full run (network plus fuzzy explainer, from the raw CSV) takes about 5
+seconds; the lab's slow motion stretches it to about 15 seconds so it can be
+followed. The full experiment suite with 5 seeds takes about 5 minutes on a
+laptop (`--quick` for 1 seed).
 
 **36. What are shoulder membership functions?**
 The outer terms are flat beyond their centre: "Low" is 1 for every value below
@@ -376,3 +400,26 @@ already exists; the contribution is combining and evaluating them carefully.
 Turning it into research would need several datasets with statistical tests,
 comparison with LIME, SHAP and Anchors, a user study with clinicians, and an
 analysis of how stable the rules are across runs.
+
+**43. Is the demo just showing precomputed results?**
+No. Every press of *Train* trains a new network and a new fuzzy system from the
+raw CSV, with the settings on screen, and streams each epoch and pruning step to
+the browser as it happens. Predictions and rule edits are computed on demand by
+the same Python models. With the default settings the lab reproduces the
+report's main model exactly, because it calls the same code with the same seeds.
+
+**44. How does the browser see training while it is running?**
+The FastAPI server (`webapp/server.py`) runs the pipeline in a background thread
+(`webapp/jobs.py`). Hooks in the training loops record an event after every
+network epoch, every ANFIS epoch and every accepted pruning edit. The browser
+holds one open connection (server-sent events) and draws each event as it
+arrives. scikit-learn has no callback for MLP training, so `StreamingMLP` in
+`blackbox.py` overrides the method scikit-learn calls once per epoch. The
+training maths is untouched.
+
+**45. Why not Streamlit?**
+We started with Streamlit. It re-runs the whole script on every click, so it
+could not show training while it ran, and every interaction redrew the page. A
+small FastAPI server plus a plain HTML/JavaScript page can stream training,
+answer slider moves in milliseconds and edit rules in place. It still has no
+build step and no internet dependency.
