@@ -213,11 +213,13 @@ class ANFIS:
         self.sigmas_ = np.clip(self.sigmas_, self.initial_sigmas_ * self.sigma_range[0],
                                self.initial_sigmas_ * self.sigma_range[1])
 
-    def fit(self, X, target, X_val=None, target_val=None):
+    def fit(self, X, target, X_val=None, target_val=None, on_epoch=None):
         """Train on inputs X and targets in [0, 1] (here: the network's probabilities).
 
         If validation data is given, the premise parameters from the epoch
         with the lowest validation error are kept (early stopping).
+        `on_epoch(model, epoch, train_loss, val_loss)` is called after every
+        epoch; the live demo uses it to animate training.
         """
         X = np.asarray(X, dtype=float)
         target = np.asarray(target, dtype=float)
@@ -238,23 +240,25 @@ class ANFIS:
         elif self.rule_init == "grid":
             self.antecedents_ = grid_rules(X.shape[1], self.n_terms)
         elif self.rule_init == "fcm":
-            self.antecedents_ = fcm_rules(Xn, target, self.centers_, self.sigmas_, self.n_rules, self.seed)
+            self.antecedents_, self.fcm_ = fcm_rules(Xn, target, self.centers_, self.sigmas_, self.n_rules,
+                                                     self.seed, return_clusters=True)
         else:
             raise ValueError("rule_init must be 'fcm' or 'grid'")
 
+        self.initial_antecedents_ = self.antecedents_.copy()
         self.history_ = {"train": [], "val": []}
-        return self._train(X, target, X_val, target_val, self.epochs)
+        return self._train(X, target, X_val, target_val, self.epochs, on_epoch)
 
-    def fine_tune(self, X, target, X_val=None, target_val=None, epochs=100):
+    def fine_tune(self, X, target, X_val=None, target_val=None, epochs=100, on_epoch=None):
         """Continue hybrid learning from the current parameters (e.g. after pruning).
 
         Terms still may not drift more than `max_shift` from their *original*
         positions, so fine-tuning cannot change what "Low" or "High" means.
         """
         return self._train(np.asarray(X, dtype=float), np.asarray(target, dtype=float),
-                           X_val, target_val, epochs)
+                           X_val, target_val, epochs, on_epoch)
 
-    def _train(self, X, target, X_val, target_val, epochs):
+    def _train(self, X, target, X_val, target_val, epochs, on_epoch=None):
         Xn = self._scale(X)
         has_val = X_val is not None and target_val is not None
         if has_val:
@@ -263,7 +267,7 @@ class ANFIS:
 
         optimizer = Adam(self.lr)
         best = (np.inf, None)
-        for _ in range(epochs):
+        for epoch in range(1, epochs + 1):
             wbar = self._normalize(self._log_firing(Xn))
             self.consequents_ = self._solve_consequents(wbar, Xn, target)    # forward pass
             y = np.sum(wbar * self._rule_outputs(Xn), axis=1)
@@ -276,6 +280,8 @@ class ANFIS:
             grad_c, grad_s = self._premise_gradients(Xn, wbar, y, target)   # backward pass
             optimizer.step([self.centers_, self.sigmas_], [grad_c, grad_s])
             self._apply_constraints()
+            if on_epoch is not None:
+                on_epoch(self, epoch, self.history_["train"][-1], val_loss if has_val else None)
 
         if best[1] is not None:
             self.centers_, self.sigmas_, self.consequents_ = best[1]

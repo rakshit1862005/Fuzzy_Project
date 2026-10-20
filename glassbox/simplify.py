@@ -32,7 +32,7 @@ def _score(model, A, X_train, t_train, X_val, nn_val_labels):
     return fid, mse, candidate
 
 
-def _greedy(model, edits, X_train, t_train, X_val, nn_val_labels, floor, mse_limit):
+def _greedy(model, edits, X_train, t_train, X_val, nn_val_labels, floor, mse_limit, on_step=None):
     """Apply the best acceptable edit until no edit is acceptable."""
     log = []
     while True:
@@ -45,6 +45,8 @@ def _greedy(model, edits, X_train, t_train, X_val, nn_val_labels, floor, mse_lim
             return model, log
         model = best[2]
         log.append(f"{best[3]} -> fidelity {best[0]:.3f}")
+        if on_step is not None:
+            on_step(model, best[3], best[0])
 
 
 def _condition_removals(model):
@@ -65,13 +67,16 @@ def _rule_removals(model):
 
 
 def simplify(model, X_train, t_train, X_val, nn_val_labels, tolerance=config.SIMPLIFY_TOLERANCE,
-             mse_growth=config.SIMPLIFY_MSE_GROWTH):
-    """Return (simplified model, list of edits made)."""
+             mse_growth=config.SIMPLIFY_MSE_GROWTH, on_step=None):
+    """Return (simplified model, list of edits made).
+
+    `on_step(model, description, fidelity)` is called after every accepted edit.
+    """
     t_train = np.asarray(t_train, dtype=float)
     base = fidelity(model.predict(X_val), nn_val_labels)
     floor = base - tolerance
     mse_limit = float(np.mean((model.predict_proba(X_train) - t_train) ** 2)) * (1 + mse_growth)
-    args = (X_train, t_train, X_val, nn_val_labels, floor, mse_limit)
+    args = (X_train, t_train, X_val, nn_val_labels, floor, mse_limit, on_step)
     model, log1 = _greedy(model, _condition_removals, *args)
     model, log2 = _greedy(model, _rule_removals, *args)
     return model, [f"start: fidelity {base:.3f}"] + log1 + log2

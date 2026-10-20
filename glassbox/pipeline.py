@@ -1,7 +1,7 @@
 """End-to-end pipeline: data -> black-box network -> fuzzy explainer.
 
-Used by both `scripts/run_experiments.py` and the Streamlit demo so that they
-always build exactly the same models.
+Used by both `scripts/run_experiments.py` and the live lab (`webapp/`) so that
+they always build exactly the same models.
 """
 import warnings
 from dataclasses import dataclass, field
@@ -25,6 +25,8 @@ class FuzzySurrogate:
     full: ANFIS                    # after training, before simplification
     model: ANFIS                   # after simplification (the one we present)
     simplify_log: list = field(default_factory=list)
+    X_fit: np.ndarray = None       # training pool (selected columns) - needed to re-fit edited rules
+    t_fit: np.ndarray = None
 
 
 @dataclass
@@ -66,13 +68,26 @@ def fit_fuzzy_surrogate(
     epochs=config.ANFIS_EPOCHS,
     fine_tune_epochs=config.FINE_TUNE_EPOCHS,
     order=0,
+    tolerance=config.SIMPLIFY_TOLERANCE,
     seed=config.SEED,
+    on_progress=None,
 ) -> FuzzySurrogate:
     """Train ANFIS to imitate the network (target="nn") or the true labels (target="truth").
 
     "truth" is a control experiment: it shows the difference between
     *explaining the network* and simply *solving the task again*.
+
+    `on_progress(stage, model, **info)` is called during training with stage
+    "anfis" (every epoch), "prune" (every accepted edit) and "fine_tune"
+    (every epoch). The live demo uses it; experiments leave it unset.
     """
+    def hook(stage):
+        if on_progress is None:
+            return None
+        if stage == "prune":
+            return lambda m, description, fid: on_progress(stage, m, description=description, fidelity=fid)
+        return lambda m, epoch, train, val: on_progress(stage, m, epoch=epoch, train_loss=train, val_loss=val)
+
     selected = list(selected)
     names = [data.feature_names[j] for j in selected]
     if target == "nn":
@@ -98,12 +113,13 @@ def fit_fuzzy_surrogate(
 
     X_fit, X_val = X_fit[:, selected], X_val[:, selected]
     full = ANFIS(names, n_terms=n_terms, n_rules=n_rules, rule_init=rule_init,
-                 constrain=constrain, epochs=epochs, order=order, seed=seed).fit(X_fit, t_fit, X_val, t_val)
+                 constrain=constrain, epochs=epochs, order=order, seed=seed
+                 ).fit(X_fit, t_fit, X_val, t_val, on_epoch=hook("anfis"))
     if not do_simplify:
-        return FuzzySurrogate(selected, full, full, [])
-    model, log = simplify(full, X_fit, t_fit, X_val, val_labels)
-    model = model.fine_tune(X_fit, t_fit, X_val, t_val, epochs=fine_tune_epochs)
-    return FuzzySurrogate(selected, full, model, log)
+        return FuzzySurrogate(selected, full, full, [], X_fit, t_fit)
+    model, log = simplify(full, X_fit, t_fit, X_val, val_labels, tolerance=tolerance, on_step=hook("prune"))
+    model = model.fine_tune(X_fit, t_fit, X_val, t_val, epochs=fine_tune_epochs, on_epoch=hook("fine_tune"))
+    return FuzzySurrogate(selected, full, model, log, X_fit, t_fit)
 
 
 def train_glassbox(seed=config.SEED, nn_params=None, n_features=config.N_FEATURES, **surrogate_kwargs) -> GlassBox:

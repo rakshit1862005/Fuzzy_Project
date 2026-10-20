@@ -27,7 +27,7 @@ def grid_rules(n_features: int, n_terms: int) -> np.ndarray:
     return np.array(list(itertools.product(range(n_terms), repeat=n_features)), dtype=int)
 
 
-def fcm_rules(X_norm, target, centers, sigmas, n_clusters, seed=config.SEED) -> np.ndarray:
+def fcm_rules(X_norm, target, centers, sigmas, n_clusters, seed=config.SEED, return_clusters=False):
     """One candidate rule per Fuzzy C-Means cluster, snapped to the shared linguistic terms.
 
     We cluster the inputs *together with the network's output*, so clusters
@@ -36,6 +36,8 @@ def fcm_rules(X_norm, target, centers, sigmas, n_clusters, seed=config.SEED) -> 
     the term (Low/Medium/High) with the highest membership at the centre.
     Clusters that translate to the same sentence are merged, so the result
     can have fewer than `n_clusters` rules.
+
+    With return_clusters=True, also returns the FCMResult (for display).
     """
     X_norm = np.asarray(X_norm, dtype=float)
     data = np.column_stack([X_norm, np.asarray(target, dtype=float)])
@@ -50,7 +52,8 @@ def fcm_rules(X_norm, target, centers, sigmas, n_clusters, seed=config.SEED) -> 
         rule = tuple(int(t) for t in log_mu.argmax(axis=1))
         if rule not in rules:
             rules.append(rule)
-    return np.array(rules, dtype=int)
+    rules = np.array(rules, dtype=int)
+    return (rules, result) if return_clusters else rules
 
 
 def unique_rules(A: np.ndarray) -> np.ndarray:
