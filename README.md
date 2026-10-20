@@ -76,7 +76,10 @@ Findings:
 
 - **Pruning roughly halves the rule base** (26 → 13 conditions on average) for
   about 0.3 points of fidelity.
-- **At equal size the fuzzy explainer is more faithful than a decision tree.**
+- **At equal size the fuzzy explainer is more faithful than a decision tree**
+  at every size tried. A single comparison on 154 patients is not statistically
+  significant (McNemar p = 0.21 at 4 rules), and the tree was trained on fewer
+  points, so treat this as consistent evidence, not proof.
 - **Interpretability constraints are free:** removing them does not raise fidelity
   (94.2 % vs 94.8 %), but terms then drift by about half the input range and
   swap order in 2 of 5 runs, so "Low" stops meaning low.
@@ -247,6 +250,7 @@ glassbox/               the library
   plots.py              figures
   pipeline.py           end-to-end training used by the script and the lab
 scripts/run_experiments.py   reproduces every number and figure
+scripts/make_guide_figures.py   figures for the project guide
 webapp/                 the live lab
   server.py             FastAPI endpoints (start a run, stream events, predict, edit rules)
   jobs.py               runs the pipeline in a thread and records an event at every step
@@ -257,10 +261,16 @@ docs/
   PROBLEM_STATEMENT.md  revised problem statement, related work, references
   METHODOLOGY.md        every step with equations (report-ready)
   VIVA_GUIDE.md         pitch, team split, demo script, 45 Q&A
+  QUICK_REVISION.md     the problem and the solution on two pages
+  guide/                the full 15-chapter project guide (start at guide/README.md)
 data/diabetes.csv       Pima Indians Diabetes dataset
 ```
 
 ## Documentation
+
+- **[Project guide](docs/guide/README.md)**: a 15-chapter guide that teaches the
+  whole project from scratch, with critical analysis and viva preparation
+- **[Quick revision sheet](docs/QUICK_REVISION.md)**: the problem and the solution on two pages
 
 - [Problem statement and references](docs/PROBLEM_STATEMENT.md)
 - [Methodology](docs/METHODOLOGY.md)
