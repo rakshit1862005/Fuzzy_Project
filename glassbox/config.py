@@ -59,6 +59,7 @@ N_RULES = 8             # number of Fuzzy C-Means clusters = upper bound on rule
 ANFIS_EPOCHS = 300
 ANFIS_LR = 0.01
 SIMPLIFY_TOLERANCE = 0.01   # largest fidelity drop allowed while pruning rules
+SIMPLIFY_MSE_GROWTH = 0.25  # largest relative growth of probability error while pruning
 FINE_TUNE_EPOCHS = 100      # extra training of the pruned rule base
 
 # "Oracle" sampling: extra synthetic inputs labelled by the neural network.

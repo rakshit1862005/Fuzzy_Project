@@ -16,14 +16,34 @@ from sklearn.preprocessing import StandardScaler
 from . import config
 
 
-def make_mlp(hidden_layer_sizes=(16, 8), alpha=1e-3, seed=config.SEED) -> Pipeline:
-    """Standardise inputs, then a ReLU MLP trained with Adam for a fixed number of epochs.
+class StreamingMLP(MLPClassifier):
+    """scikit-learn's MLPClassifier that can report after every epoch.
 
-    `alpha` is the L2 weight penalty that controls overfitting. We tried
+    scikit-learn has no callback for MLP training, so we hook the method it
+    calls once at the end of each epoch. Training itself is unchanged: with
+    `on_epoch` unset this is exactly MLPClassifier. The live demo sets
+    `on_epoch(model, epoch)` to stream the loss curve while training runs.
+    """
+
+    on_epoch = None
+
+    def _update_no_improvement_count(self, *args, **kwargs):
+        super()._update_no_improvement_count(*args, **kwargs)
+        if self.on_epoch is not None:
+            self.on_epoch(self, self.n_iter_)
+
+
+def make_mlp(hidden_layer_sizes=(16, 8), alpha=1e-3, seed=config.SEED) -> Pipeline:
+    """Standardise inputs, then a ReLU MLP trained with Adam.
+
+    Training stops when the *training* loss has not improved by at least
+    1e-4 for 10 consecutive epochs (scikit-learn's default `tol` and
+    `n_iter_no_change`), or after 500 epochs at most. `alpha` is the L2
+    weight penalty that controls overfitting. We tried validation-based
     early stopping first, but with only ~460 training patients its held-out
     slice (~70 patients) was too small and made results jump between runs.
     """
-    mlp = MLPClassifier(
+    mlp = StreamingMLP(
         hidden_layer_sizes=hidden_layer_sizes,
         activation="relu",
         solver="adam",

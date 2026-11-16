@@ -18,6 +18,26 @@ def gaussian(x, center, sigma):
     return np.exp(-0.5 * ((np.asarray(x) - center) / sigma) ** 2)
 
 
+def term_offsets(X, centers):
+    """Distance of each value from each term centre, with "shoulders" at both ends.
+
+    X: (n, k) inputs, centers: (k, m) -> (n, k, m). The first term (Low) is
+    flat at membership 1 below its centre and the last term (High) is flat at
+    1 above it, so a glucose of 200 is fully "High" rather than "not quite High".
+    Inner terms (Medium) are ordinary bells.
+    """
+    d = np.asarray(X, dtype=float)[:, :, None] - np.asarray(centers)[None]
+    if d.shape[2] > 1:
+        d[:, :, 0] = np.maximum(d[:, :, 0], 0.0)      # below the Low centre: offset 0, mu = 1
+        d[:, :, -1] = np.minimum(d[:, :, -1], 0.0)    # above the High centre: offset 0, mu = 1
+    return d
+
+
+def log_memberships(X, centers, sigmas):
+    """log mu for every input, value and term: -(offset)^2 / (2 sigma^2)."""
+    return -0.5 * (term_offsets(X, centers) / np.asarray(sigmas)[None]) ** 2
+
+
 def term_names(n_terms: int) -> list:
     if n_terms not in TERM_NAMES:
         raise ValueError(f"n_terms must be one of {sorted(TERM_NAMES)}")

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Glass-Box Insight</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232a78d6'/><path d='M8 22 Q13 6 16 16 T24 10' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/></svg>">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"></span>
+    <div>
+      <div class="brand-name">Glass-Box Insight</div>
+      <div class="brand-sub">A neural network decides. Fuzzy rules explain why.</div>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="train" role="tab">1 · Train</button>
+    <button class="tab" data-view="explore" role="tab" disabled>2 · Explore</button>
+    <button class="tab" data-view="rules" role="tab" disabled>3 · Edit rules</button>
+    <button class="tab" data-view="runs" role="tab">4 · Compare runs</button>
+  </nav>
+  <div class="top-right">
+    <span id="run-pill" class="pill">No run yet</span>
+    <button id="theme" class="icon-btn" title="Switch light / dark" aria-label="Switch light or dark theme">◐</button>
+  </div>
+</header>
+
+<main>
+<!-- ============================================================ TRAIN -->
+<section id="view-train" class="view active">
+  <aside class="panel config">
+    <form id="config">
+      <h2>Settings</h2>
+      <p class="hint">Every run trains a new network and a new fuzzy system from the raw CSV.
+        The defaults are the settings used in the report.</p>
+
+      <fieldset>
+        <legend>Black box · neural network</legend>
+        <label>Hidden layers
+          <select name="hidden_layers">
+            <option value="8">8 neurons</option>
+            <option value="16">16 neurons</option>
+            <option value="16,8">16 → 8 neurons</option>
+            <option value="32,16">32 → 16 neurons</option>
+          </select>
+        </label>
+        <label>L2 penalty α
+          <select name="alpha">
+            <option>0.001</option><option>0.01</option><option>0.1</option><option selected>1</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" name="tune"> Choose size and α by 5-fold cross-validation (adds ~15 s)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Fuzzy explainer · ANFIS</legend>
+        <label>Inputs used by the rules <output data-for="n_features"></output>
+          <input type="range" name="n_features" min="2" max="6" step="1"></label>
+        <label>Terms per input
+          <select name="n_terms"><option value="2">2 · Low, High</option><option value="3" selected>3 · Low, Medium, High</option></select>
+        </label>
+        <label>FCM clusters (upper bound on rules) <output data-for="n_rules"></output>
+          <input type="range" name="n_rules" min="2" max="16" step="1"></label>
+        <label>THEN-part
+          <select name="order"><option value="0">Constant · "risk = 0.85"</option><option value="1">Linear formula (first-order)</option></select>
+        </label>
+        <label>Training epochs <output data-for="epochs"></output>
+          <input type="range" name="epochs" min="20" max="600" step="20"></label>
+        <label>Imitate
+          <select name="target"><option value="nn">The network (explainer)</option><option value="truth">The true diagnosis (control)</option></select>
+        </label>
+        <label class="check"><input type="checkbox" name="constrain"> Keep terms meaningful (constraints)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Data &amp; simplification</legend>
+        <label>Synthetic patients asked to the network <output data-for="oracle_samples"></output>
+          <input type="range" name="oracle_samples" min="0" max="4000" step="250"></label>
+        <label class="check"><input type="checkbox" name="prune"> Prune conditions and rules</label>
+        <label>Allowed fidelity loss while pruning <output data-for="tolerance" data-pct></output>
+          <input type="range" name="tolerance" min="0" max="0.05" step="0.005"></label>
+        <label>Random seed (rules &amp; synthetic data)
+          <input type="number" name="seed" min="0" max="9999"></label>
+        <label class="check"><input type="checkbox" name="slow_motion"> Slow motion (easier to follow live)</label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" id="train-btn" class="primary">▶ Train</button>
+        <button type="button" id="reset-btn" class="ghost">Report settings</button>
+      </div>
+    </form>
+  </aside>
+
+  <div class="train-main">
+    <ol class="stepper" id="stepper">
+      <li data-stage="data"><span class="dot"></span>Data</li>
+      <li data-stage="network"><span class="dot"></span>Neural network</li>
+      <li data-stage="importance"><span class="dot"></span>Importance</li>
+      <li data-stage="rules"><span class="dot"></span>FCM rules</li>
+      <li data-stage="anfis"><span class="dot"></span>ANFIS</li>
+      <li data-stage="prune"><span class="dot"></span>Pruning</li>
+      <li data-stage="evaluate"><span class="dot"></span>Evaluation</li>
+    </ol>
+
+    <div id="train-empty" class="empty">
+      <h3>Press <em>Train</em> to run the whole pipeline live.</h3>
+      <p>You will watch the neural network learn, see which inputs it relies on, see Fuzzy C-Means
+        propose rules, watch ANFIS reshape the Low/Medium/High terms epoch by epoch, and watch
+        pruning delete conditions one at a time.</p>
+    </div>
+
+    <div id="train-grid" class="grid hidden">
+      <article class="card">
+        <header><h3>① Neural network learns</h3><span class="kpi" id="nn-kpi"></span></header>
+        <p class="sub">Training loss (cross-entropy) per epoch: backpropagation with Adam.</p>
+        <div class="chart" id="chart-nn"></div>
+        <div id="cv-box" class="cv hidden"><h4>Cross-validation (ROC-AUC per setting)</h4><div id="cv-list"></div></div>
+      </article>
+
+      <article class="card">
+        <header><h3>② What the network relies on</h3></header>
+        <p class="sub">Shuffle one input and measure how much the network's output moves (permutation importance).
+          Blue inputs go to the fuzzy system.</p>
+        <div class="chart" id="chart-imp"></div>
+      </article>
+
+      <article class="card wide">
+        <header><h3>③ ANFIS learns to imitate the network</h3><span class="kpi" id="anfis-kpi"></span></header>
+        <p class="sub">Hybrid learning: least squares for the THEN-parts, gradient descent for the membership
+          functions. Dashed curves are the starting terms.</p>
+        <div class="split">
+          <div class="chart" id="chart-anfis"></div>
+          <div class="mf-grid" id="mf-train"></div>
+        </div>
+      </article>
+
+      <article class="card wide">
+        <header><h3>④ Rule base: proposed by FCM, then pruned</h3><span class="kpi" id="prune-kpi"></span></header>
+        <p class="sub">Left: the rule base right now. Right: every accepted pruning edit, newest first (each keeps fidelity
+          within the allowed loss).</p>
+        <div class="split">
+          <ol class="rule-list" id="rules-live"></ol>
+          <ol class="log" id="prune-log"></ol>
+        </div>
+      </article>
+
+      <article class="card wide result hidden" id="result-card">
+        <header><h3>⑤ Result on 154 unseen test patients</h3></header>
+        <div class="tiles" id="result-tiles"></div>
+        <div class="actions">
+          <button class="primary" data-goto="explore">Explore patients →</button>
+          <button class="ghost" data-goto="rules">Edit the rules →</button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== EXPLORE -->
+<section id="view-explore" class="view">
+  <aside class="panel">
+    <h2>Patient</h2>
+    <label>Start from
+      <select id="patient"></select></label>
+    <div id="sliders"></div>
+    <p class="hint" id="truth"></p>
+  </aside>
+  <div class="explore-main">
+    <div class="verdict">
+      <div class="gauge" id="gauge-nn"></div>
+      <div class="gauge" id="gauge-fz"></div>
+      <div class="badges" id="badges"></div>
+    </div>
+    <div class="grid">
+      <article class="card wide">
+        <header><h3>Why: the rules that fired</h3></header>
+        <p class="sub">Weight = share of the decision. Contribution = weight × rule risk; the contributions add up
+          exactly to the fuzzy risk.</p>
+        <div class="stack" id="stack"></div>
+        <p class="legend"><span class="sw" style="background:var(--s2)"></span>rules that say <i>diabetic</i> (risk ≥ 0.5)
+          <span class="sw" style="background:var(--s1)"></span>rules that say <i>non-diabetic</i>
+          <span class="sw" style="background:var(--grid)"></span>remaining up to 1 · the coloured part is the fuzzy risk</p>
+        <div id="fired"></div>
+      </article>
+      <article class="card wide">
+        <header><h3>Fuzzification: how much each value is Low / Medium / High</h3></header>
+        <div class="mf-grid" id="mf-explore"></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ RULES -->
+<section id="view-rules" class="view">
+  <div class="rules-main">
+    <div class="rules-head">
+      <div>
+        <h2>Edit the rule base</h2>
+        <p class="hint">Click a condition to change its term, × to delete it, + to add one. Rule outputs are
+          re-fitted by least squares after every edit and the test-set fidelity updates immediately.</p>
+      </div>
+      <div class="actions">
+        <button class="ghost" id="add-rule">+ Add rule</button>
+        <button class="ghost" id="reset-rules">Reset to trained rules</button>
+      </div>
+    </div>
+    <div class="tiles" id="edit-tiles"></div>
+    <div id="editor"></div>
+  </div>
+</section>
+
+<!-- ============================================================= RUNS -->
+<section id="view-runs" class="view">
+  <div class="runs-main">
+    <article class="card">
+      <header><h3>Your runs: fidelity vs size</h3></header>
+      <p class="sub">Upper left is better: fewer conditions, more faithful to the network. Click a dot or a row to reopen
+        that run.</p>
+      <p class="legend"><span class="sw dot" style="background:var(--s1)"></span>fuzzy rules imitating the network
+        <span class="sw dot" style="background:var(--s2)"></span>fuzzy rules trained on true labels
+        <span class="sw dot hollow"></span>after your manual edits
+        <span class="sw dot" style="background:var(--s3)"></span>decision tree of the same size</p>
+      <div class="chart tall" id="chart-runs"></div>
+    </article>
+    <article class="card">
+      <header><h3>All runs</h3></header>
+      <div class="table-wrap"><table id="runs-table"></table></div>
+    </article>
+  </div>
+</section>
+</main>
+
+<div id="tooltip" class="tooltip" role="status" aria-live="polite"></div>
+<script src="/static/charts.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

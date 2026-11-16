@@ -32,11 +32,27 @@ def condition_text(model, j, t, with_value=True) -> str:
     return text
 
 
+def linear_then_part(model, r) -> str:
+    """A first-order THEN-part written in original units: b + a1*x1 + ...
+
+    The model stores coefficients for inputs scaled to [0, 1]; we convert them
+    back so the formula uses mg/dL, years, etc.
+    """
+    coef = model.consequents_[r, :-1] / model.span_
+    intercept = model.consequents_[r, -1] - np.sum(coef * model.lo_)
+    terms = [f"{intercept:.3g}"]
+    for a, name in zip(coef, model.feature_names):
+        terms.append(f"{'-' if a < 0 else '+'} {abs(a):.3g}*{name}")
+    return " ".join(terms)
+
+
 def rule_text(model, r, with_value=True) -> str:
     A = model.antecedents_
     conditions = [condition_text(model, j, A[r, j], with_value)
                   for j in range(A.shape[1]) if A[r, j] != DONT_CARE]
     if_part = " AND ".join(conditions) if conditions else "(always)"
+    if model.order == 1:
+        return f"IF {if_part} THEN risk = {linear_then_part(model, r)}"
     p = model.consequents_[r]
     decision = config.CLASS_NAMES[int(p >= model.threshold)]
     return f"IF {if_part} THEN risk = {p:.2f} ({risk_label(p)} -> {decision})"
@@ -52,13 +68,17 @@ def rule_table(model, X) -> pd.DataFrame:
     winner = wbar.argmax(axis=1)
     rows = []
     for r in range(len(model.antecedents_)):
-        p = model.consequents_[r]
+        if model.order == 1:
+            then, meaning, decision = linear_then_part(model, r), "depends on inputs", "depends on inputs"
+        else:
+            p = float(model.consequents_[r])
+            then, meaning, decision = round(p, 3), risk_label(p), config.CLASS_NAMES[int(p >= model.threshold)]
         rows.append({
             "rule": r + 1,
             "IF": rule_text(model, r).split(" THEN ")[0][3:],
-            "THEN risk": round(float(p), 3),
-            "meaning": risk_label(p),
-            "decision": config.CLASS_NAMES[int(p >= model.threshold)],
+            "THEN risk": then,
+            "meaning": meaning,
+            "decision": decision,
             "coverage": round(float(np.mean(winner == r)), 3),
             "avg_weight": round(float(wbar[:, r].mean()), 3),
         })

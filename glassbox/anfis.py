@@ -5,11 +5,14 @@ We use a zero-order Takagi-Sugeno system, so every rule has the form
     Rule r:  IF x_1 is A_r1 AND ... AND x_k is A_rk  THEN  y = p_r
 
 where p_r is a single number (the diabetes risk this rule predicts). This is
-far easier to read than first-order rules with a linear formula after THEN.
+far easier to read than first-order rules with a linear formula after THEN,
+    THEN y = b_r + a_r1 x_1 + ... + a_rk x_k,
+which are also supported (order=1) so the two can be compared experimentally.
 
 The five ANFIS layers, for one input vector x:
 
     1. Fuzzification     mu_jt(x_j) = exp(-(x_j - c_jt)^2 / (2 s_jt^2))
+                         ("Low" and "High" are shoulders: flat at 1 beyond their centre)
     2. Rule firing       w_r  = product of the memberships named in rule r  (AND = product)
     3. Normalisation     wn_r = w_r / sum_q w_q
     4. Consequents       wn_r * p_r
@@ -23,8 +26,10 @@ Hybrid learning (one epoch):
 
 Interpretability constraints after every update keep the terms meaningful:
 each centre may drift at most `max_shift` from its starting position (so
-"Low" stays low), centres stay sorted (Low < Medium < High) with a minimum
-gap, and widths stay within [sigma_min, sigma_max].
+"Low" stays low), centres stay sorted (Low < Medium < High) and neighbours
+keep at least half of their original distance, and each width stays between
+half and double its starting value (so no term shrinks to a spike or swallows
+its neighbours).
 
 All computations happen on inputs min-max scaled to [0, 1]; centres and widths
 are converted back to original units only for display.
@@ -34,7 +39,7 @@ import copy
 import numpy as np
 
 from . import config
-from .membership import initial_partition, term_names
+from .membership import initial_partition, log_memberships, term_names, term_offsets
 from .rulebase import DONT_CARE, fcm_rules, grid_rules
 
 
@@ -71,13 +76,15 @@ class ANFIS:
         lr=config.ANFIS_LR,
         ridge=1.0,
         constrain=True,
-        min_gap=0.05,
+        min_gap_ratio=0.5,
         max_shift=0.1,
-        sigma_min=0.03,
-        sigma_max=0.5,
+        sigma_range=(0.5, 2.0),
         threshold=config.DECISION_THRESHOLD,
+        order=0,
         seed=config.SEED,
     ):
+        if order not in (0, 1):
+            raise ValueError("order must be 0 (constant THEN-part) or 1 (linear THEN-part)")
         self.feature_names = list(feature_names)
         self.n_terms = n_terms
         self.term_names = term_names(n_terms)
@@ -88,11 +95,11 @@ class ANFIS:
         self.lr = lr
         self.ridge = ridge
         self.constrain = constrain
-        self.min_gap = min_gap
+        self.min_gap_ratio = min_gap_ratio
         self.max_shift = max_shift
-        self.sigma_min = sigma_min
-        self.sigma_max = sigma_max
+        self.sigma_range = sigma_range
         self.threshold = threshold
+        self.order = order
         self.seed = seed
 
     # ------------------------------------------------------------ scaling
@@ -111,7 +118,7 @@ class ANFIS:
     def _log_memberships(self, Xn, centers=None, sigmas=None):
         c = self.centers_ if centers is None else centers
         s = self.sigmas_ if sigmas is None else sigmas
-        return -0.5 * ((Xn[:, :, None] - c[None]) / s[None]) ** 2      # (n, k, m)
+        return log_memberships(Xn, c, s)                                # (n, k, m)
 
     def _log_firing(self, Xn, centers=None, sigmas=None, antecedents=None):
         """log w_r = sum of log-memberships in rule r (log of the product).
@@ -132,39 +139,59 @@ class ANFIS:
         w = np.exp(log_w - log_w.max(axis=1, keepdims=True))
         return w / w.sum(axis=1, keepdims=True)
 
-    # ----------------------------------------------------- hybrid learning
-    def _solve_consequents(self, wbar, target):
-        """Least squares for p: minimise ||wbar p - t||^2 + ridge * ||p - prior||^2.
+    # ----------------------------------------------------- layers 4 - 5
+    def _rule_outputs(self, Xn):
+        """(n, R) output of every rule for every input: p_r, or b_r + a_r . x for order 1."""
+        if self.order == 0:
+            return np.broadcast_to(self.consequents_, (len(Xn), len(self.consequents_)))
+        return np.column_stack([Xn, np.ones(len(Xn))]) @ self.consequents_.T
 
-        The small ridge term acts like one imaginary patient of average risk
-        per rule, so a rule that almost never fires gets a neutral output
-        instead of an arbitrary one. Outputs are clipped to [0, 1] because
-        they are probabilities.
+    # ----------------------------------------------------- hybrid learning
+    def _solve_consequents(self, wbar, Xn, target):
+        """Least squares for the THEN-parts, with the IF-parts fixed.
+
+        Order 0: minimise ||wbar p - t||^2 + ridge * ||p - prior||^2. The small
+        ridge term acts like one imaginary patient of average risk per rule, so
+        a rule that almost never fires gets a neutral output instead of an
+        arbitrary one. Outputs are clipped to [0, 1] because they are
+        probabilities.
+        Order 1: the same, with one column per (rule, input) pair plus one per
+        rule for the intercept; coefficients are pulled towards 0.
         """
         R = wbar.shape[1]
-        lhs = wbar.T @ wbar + self.ridge * np.eye(R)
-        rhs = wbar.T @ target + self.ridge * self.prior_
-        return np.clip(np.linalg.solve(lhs, rhs), 0.0, 1.0)
+        if self.order == 0:
+            lhs = wbar.T @ wbar + self.ridge * np.eye(R)
+            rhs = wbar.T @ target + self.ridge * self.prior_
+            return np.clip(np.linalg.solve(lhs, rhs), 0.0, 1.0)
+        Z = np.column_stack([Xn, np.ones(len(Xn))])                      # (n, k + 1)
+        Phi = (wbar[:, :, None] * Z[:, None, :]).reshape(len(Xn), -1)    # (n, R * (k + 1))
+        prior = np.tile(np.r_[np.zeros(Z.shape[1] - 1), self.prior_], R)
+        lhs = Phi.T @ Phi + self.ridge * np.eye(Phi.shape[1])
+        rhs = Phi.T @ target + self.ridge * prior
+        return np.linalg.solve(lhs, rhs).reshape(R, Z.shape[1])
 
     def _premise_gradients(self, Xn, wbar, y, target):
         """dLoss/dc and dLoss/ds for the loss L = mean((y - t)^2), with p held fixed.
 
         Chain rule: dL/dtheta = sum_n sum_r G[n, r] * dlog(w_r)/dtheta, where
-            G[n, r] = 2/N * (y_n - t_n) * wn_r * (p_r - y_n)
-        and for a Gaussian term used by rule r:
-            dlog(mu)/dc = (x - c) / s^2,     dlog(mu)/ds = (x - c)^2 / s^3
+            G[n, r] = 2/N * (y_n - t_n) * wn_r * (f_r(x_n) - y_n)
+        and f_r is rule r's output (p_r for order 0)
+        and for a Gaussian term used by rule r, with d = x - c:
+            dlog(mu)/dc = d / s^2,     dlog(mu)/ds = d^2 / s^3
+        (on the flat part of a shoulder d = 0, so the gradient is 0 there).
         """
-        p = self.consequents_
-        G = (2.0 / len(Xn)) * (y - target)[:, None] * wbar * (p[None, :] - y[:, None])
+        F = self._rule_outputs(Xn)
+        G = (2.0 / len(Xn)) * (y - target)[:, None] * wbar * (F - y[:, None])
         grad_c = np.zeros_like(self.centers_)
         grad_s = np.zeros_like(self.sigmas_)
+        offsets = term_offsets(Xn, self.centers_)
         for j in range(self.centers_.shape[0]):
             for t in range(self.n_terms):
                 rules_using = self.antecedents_[:, j] == t
                 if not rules_using.any():
                     continue
                 g = G[:, rules_using].sum(axis=1)
-                diff = Xn[:, j] - self.centers_[j, t]
+                diff = offsets[:, j, t]
                 s = self.sigmas_[j, t]
                 grad_c[j, t] = np.sum(g * diff) / s ** 2
                 grad_s[j, t] = np.sum(g * diff ** 2) / s ** 3
@@ -180,15 +207,19 @@ class ANFIS:
         order = np.argsort(self.centers_, axis=1)            # keep Low < Medium < High
         self.centers_ = np.take_along_axis(self.centers_, order, axis=1)
         self.sigmas_ = np.take_along_axis(self.sigmas_, order, axis=1)
+        min_gaps = self.min_gap_ratio * np.diff(self.initial_centers_, axis=1)
         for t in range(1, self.n_terms):                     # terms may not merge
-            self.centers_[:, t] = np.maximum(self.centers_[:, t], self.centers_[:, t - 1] + self.min_gap)
-        self.sigmas_ = np.clip(self.sigmas_, self.sigma_min, self.sigma_max)
+            self.centers_[:, t] = np.maximum(self.centers_[:, t], self.centers_[:, t - 1] + min_gaps[:, t - 1])
+        self.sigmas_ = np.clip(self.sigmas_, self.initial_sigmas_ * self.sigma_range[0],
+                               self.initial_sigmas_ * self.sigma_range[1])
 
-    def fit(self, X, target, X_val=None, target_val=None):
+    def fit(self, X, target, X_val=None, target_val=None, on_epoch=None):
         """Train on inputs X and targets in [0, 1] (here: the network's probabilities).
 
         If validation data is given, the premise parameters from the epoch
         with the lowest validation error are kept (early stopping).
+        `on_epoch(model, epoch, train_loss, val_loss)` is called after every
+        epoch; the live demo uses it to animate training.
         """
         X = np.asarray(X, dtype=float)
         target = np.asarray(target, dtype=float)
@@ -209,23 +240,25 @@ class ANFIS:
         elif self.rule_init == "grid":
             self.antecedents_ = grid_rules(X.shape[1], self.n_terms)
         elif self.rule_init == "fcm":
-            self.antecedents_ = fcm_rules(Xn, target, self.centers_, self.sigmas_, self.n_rules, self.seed)
+            self.antecedents_, self.fcm_ = fcm_rules(Xn, target, self.centers_, self.sigmas_, self.n_rules,
+                                                     self.seed, return_clusters=True)
         else:
             raise ValueError("rule_init must be 'fcm' or 'grid'")
 
+        self.initial_antecedents_ = self.antecedents_.copy()
         self.history_ = {"train": [], "val": []}
-        return self._train(X, target, X_val, target_val, self.epochs)
+        return self._train(X, target, X_val, target_val, self.epochs, on_epoch)
 
-    def fine_tune(self, X, target, X_val=None, target_val=None, epochs=100):
+    def fine_tune(self, X, target, X_val=None, target_val=None, epochs=100, on_epoch=None):
         """Continue hybrid learning from the current parameters (e.g. after pruning).
 
         Terms still may not drift more than `max_shift` from their *original*
         positions, so fine-tuning cannot change what "Low" or "High" means.
         """
         return self._train(np.asarray(X, dtype=float), np.asarray(target, dtype=float),
-                           X_val, target_val, epochs)
+                           X_val, target_val, epochs, on_epoch)
 
-    def _train(self, X, target, X_val, target_val, epochs):
+    def _train(self, X, target, X_val, target_val, epochs, on_epoch=None):
         Xn = self._scale(X)
         has_val = X_val is not None and target_val is not None
         if has_val:
@@ -234,10 +267,10 @@ class ANFIS:
 
         optimizer = Adam(self.lr)
         best = (np.inf, None)
-        for _ in range(epochs):
+        for epoch in range(1, epochs + 1):
             wbar = self._normalize(self._log_firing(Xn))
-            self.consequents_ = self._solve_consequents(wbar, target)        # forward pass
-            y = wbar @ self.consequents_
+            self.consequents_ = self._solve_consequents(wbar, Xn, target)    # forward pass
+            y = np.sum(wbar * self._rule_outputs(Xn), axis=1)
             self.history_["train"].append(float(np.mean((y - target) ** 2)))
             if has_val:
                 val_loss = float(np.mean((self._raw_output(Xn_val) - target_val) ** 2))
@@ -247,6 +280,8 @@ class ANFIS:
             grad_c, grad_s = self._premise_gradients(Xn, wbar, y, target)   # backward pass
             optimizer.step([self.centers_, self.sigmas_], [grad_c, grad_s])
             self._apply_constraints()
+            if on_epoch is not None:
+                on_epoch(self, epoch, self.history_["train"][-1], val_loss if has_val else None)
 
         if best[1] is not None:
             self.centers_, self.sigmas_, self.consequents_ = best[1]
@@ -256,7 +291,11 @@ class ANFIS:
 
     # ----------------------------------------------------------- inference
     def _raw_output(self, Xn):
-        return self._normalize(self._log_firing(Xn)) @ self.consequents_
+        return np.sum(self._normalize(self._log_firing(Xn)) * self._rule_outputs(Xn), axis=1)
+
+    def rule_outputs(self, X):
+        """Layer 4 before weighting: what each rule says for each input."""
+        return np.array(self._rule_outputs(self._scale(X)))
 
     def predict_proba(self, X):
         """Layer 5 output, read as P(diabetic)."""
@@ -276,8 +315,9 @@ class ANFIS:
 
     # ------------------------------------------------- rule-base editing
     def refit_consequents(self, X, target):
-        wbar = self._normalize(self._log_firing(self._scale(X)))
-        self.consequents_ = self._solve_consequents(wbar, np.asarray(target, dtype=float))
+        Xn = self._scale(X)
+        wbar = self._normalize(self._log_firing(Xn))
+        self.consequents_ = self._solve_consequents(wbar, Xn, np.asarray(target, dtype=float))
         return self
 
     def with_antecedents(self, antecedents, X, target):
