@@ -1,0 +1,1186 @@
+\section{Explaining Neural Network Decisions in Diabetes Diagnosis Using
+Fuzzy Logic
+Rules}\label{explaining-neural-network-decisions-in-diabetes-diagnosis-using-fuzzy-logic-rules}
+
+\subsubsection{Complete Project Explainer \& Web Dashboard User
+Guide}\label{complete-project-explainer-web-dashboard-user-guide}
+
+\begin{quote}
+\textbf{Project Title:} Explaining Neural Network Decisions in Diabetes
+Diagnosis Using Fuzzy Logic Rules\\
+\textbf{Course:} Fuzzy Logic and Neural Networks (EEO1003)\\
+\textbf{Department:} Department of Electrical Engineering, Punjab
+Engineering College (Deemed to be University), Chandigarh\\
+\textbf{Mentors:} Dr.~Rintu Khanna (Professor) \& Dr.~Hemant Kumar
+(Assistant Professor) (Department of Electrical Engineering)\\
+\textbf{Authors:} Rakshit (23106017), Aarav (23106023), Aryan Garg
+(23106024), Amish Bansal (23103087)\\
+\textbf{Academic Year:} 2026--2027\\
+\textbf{Application Repository:}
+\texttt{d:\textbackslash{}Fuzzy\_Project\textbackslash{}Fuzzy\_Project}\\
+\textbf{Web Dashboard URL:} \url{http://127.0.0.1:8000}
+\end{quote}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{Table of Contents}\label{table-of-contents}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \hyperref[1-executive-summary-what-is-glass-box-insight]{Executive
+  Summary: What is Glass-Box Insight?}
+\item
+  \hyperref[2-the-core-problem-why-is-this-project-needed]{The Core
+  Problem: Why is this Project Needed?}
+\item
+  \hyperref[3-the-dataset-clinical-context--preprocessing-architecture]{The
+  Dataset: Clinical Context \& Preprocessing Architecture}
+\item
+  \hyperref[4-the-core-techniques-used-step-by-step-technical-breakdown]{The
+  Core Techniques Used: Step-by-Step Technical Breakdown}
+\item
+  \hyperref[5-how-to-launch-and-run-the-project]{How to Launch and Run
+  the Project}
+\item
+  \hyperref[6-complete-web-dashboard-walkthrough-what-every-element-means]{Complete
+  Web Dashboard Walkthrough (What Every Element Means)}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \hyperref[topbar--global-controls]{Topbar \& Global Controls}
+  \item
+    \hyperref[view-1-train-settings-stepper--real-time-telemetry]{View
+    1: Train (Settings, Stepper, \& Real-Time Telemetry)}
+  \item
+    \hyperref[view-2-explore-clinical-sliders-dual-gauges--traceability]{View
+    2: Explore (Clinical Sliders, Dual Gauges, \& Traceability)}
+  \item
+    \hyperref[view-3-edit-rules-human-in-the-loop-counterfactual-simulation]{View
+    3: Edit Rules (Human-in-the-Loop Counterfactual Simulation)}
+  \item
+    \hyperref[view-4-compare-runs-pareto-frontier--historical-benchmarks]{View
+    4: Compare Runs (Pareto Frontier \& Historical Benchmarks)}
+  \end{itemize}
+\item
+  \hyperref[7-frequently-asked-questions--professor-viva-defense-guide]{Frequently
+  Asked Questions \& Professor Viva Defense Guide}
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{1. Executive Summary: What is Glass-Box
+Insight?}\label{executive-summary-what-is-glass-box-insight}
+
+\textbf{Glass-Box Insight} is an Explainable Artificial Intelligence
+(XAI) system designed for clinical decision support. Its core philosophy
+is summarized by its tagline:
+\[\textbf{\textit{``A neural network decides. Fuzzy rules explain why.''}}\]
+
+\subsubsection{The High-Level Concept}\label{the-high-level-concept}
+
+\begin{itemize}
+\tightlist
+\item
+  In modern medicine, deep learning models and multi-layer neural
+  networks achieve high diagnostic accuracy, but they operate as
+  \textbf{opaque ``black boxes''}. They output a single probability
+  number (e.g., \emph{``Patient \#152 has an 84\% probability of
+  diabetes''}), but they cannot tell the doctor \emph{why}.
+\item
+  \textbf{Glass-Box Insight} solves this problem by training a
+  transparent \textbf{Takagi-Sugeno-Kang (TSK) Neuro-Fuzzy Inference
+  System} (ANFIS) to act as a \textbf{pedagogical surrogate} that
+  imitates the neural network.
+\item
+  Instead of uninterpretable weight matrices, our system extracts
+  \textbf{4 human-readable IF-THEN rules} with smooth linguistic terms
+  (\emph{Low}, \emph{Medium}, \emph{High}), such as:
+  \[\textbf{IF } \text{Glucose is High } \textbf{AND } \text{BMI is High } \textbf{THEN } \text{Risk} = 0.85 \text{ (High Risk)}\]
+\item
+  The extracted rules achieve \textbf{92.2\% test fidelity} (and
+  \textbf{98.3\% confident fidelity}) relative to the neural network,
+  meaning a physician gets the high accuracy of neural computation
+  alongside the complete safety, auditability, and trust of transparent
+  fuzzy logic.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{2. The Core Problem: Why is this Project
+Needed?}\label{the-core-problem-why-is-this-project-needed}
+
+\subsubsection{2.1 The High Accuracy vs.~Dangerous Opacity
+Dilemma}\label{the-high-accuracy-vs.-dangerous-opacity-dilemma}
+
+Artificial Neural Networks (ANNs) excel at finding non-linear patterns
+in patient records. However, in critical healthcare applications,
+deploying an opaque model introduces severe risks: 1.
+\textbf{Verification Necessity:} A doctor cannot prescribe aggressive
+diabetes medication or order expensive biopsies simply because a
+computer said so without knowing which clinical biomarkers drove the
+diagnosis. 2. \textbf{Confounding Artifacts:} Black boxes can exploit
+dataset biases, laboratory recording errors, or spurious correlations
+while maintaining high test accuracy. 3. \textbf{Medical Ethics \&
+Doctor-Patient Communication:} Physicians are legally and ethically
+obligated to explain diagnostic decisions in plain clinical terms to
+patients. 4. \textbf{Regulatory Mandates:} - \textbf{EU AI Act:}
+Formally classifies medical AI diagnostic tools as \emph{High-Risk},
+mandating human interpretability and traceable decision oversight. -
+\textbf{GDPR (Articles 13--22):} Guarantees patients the legal
+\emph{``Right to Explanation''} for automated decisions. - \textbf{U.S.
+FDA SaMD Guidelines:} Mandates full audit trails and decision
+traceability for Software as a Medical Device.
+
+\subsubsection{2.2 Why Existing Explainability Tools (LIME, SHAP,
+Decision Trees) Fall
+Short}\label{why-existing-explainability-tools-lime-shap-decision-trees-fall-short}
+
+Prior approaches attempted to explain neural networks, but each has
+major clinical flaws: - \textbf{LIME (Local Interpretable Model-agnostic
+Explanations):} Perturbs input values randomly and fits local linear
+models. Because it relies on stochastic sampling, explanations fluctuate
+wildly across runs for the exact same patient. Furthermore, it only
+explains a single patient and cannot provide an auditable hospital-wide
+rule policy. - \textbf{SHAP (Shapley Additive Explanations):} Provides
+local feature attribution bars, but assumes feature independence (which
+fails in human physiology where Glucose and Insulin are tightly
+correlated) and cannot provide global IF-THEN clinical rules. -
+\textbf{Decision Tree Surrogates (TREPAN):} Uses rigid step-function
+thresholds (e.g., \(\text{Glucose} \le 127.5\)). A patient with Glucose
+= 127.4 mg/dL is classified as completely healthy, while 127.6 mg/dL
+triggers a diabetic branch---an unrealistic, discontinuous cliff that
+contradicts continuous human physiology.
+
+\subsubsection{2.3 The Glass-Box Solution}\label{the-glass-box-solution}
+
+By bridging \textbf{Fuzzy Set Theory} (continuous, graded membership
+without cliffs) and \textbf{Neural Networks} (adaptive gradient
+learning), Glass-Box Insight provides: - Smooth, realistic physiological
+boundaries. - Global, auditable IF-THEN rule policies. - Full whiteboard
+arithmetic traceability (every calculation can be verified by hand in 30
+seconds). - Active detection of out-of-distribution / atypical patients
+to prevent silent AI hallucinations.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{3. The Dataset: Clinical Context \& Preprocessing
+Architecture}\label{the-dataset-clinical-context-preprocessing-architecture}
+
+The system is evaluated on the benchmark \textbf{Pima Indians Diabetes
+Database (PIDD)}, curated by the National Institute of Diabetes and
+Digestive and Kidney Diseases (NIDDK) and hosted by the UCI Machine
+Learning Repository.
+
+\subsubsection{3.1 Clinical Features and Physiological
+Axes}\label{clinical-features-and-physiological-axes}
+
+The dataset contains records for \(N = 768\) female patients of Pima
+Indian heritage aged 21 and older, categorized across three
+physiological metabolic axes:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2353}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2353}}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2941}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2353}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Physiological Axis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Feature Name
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Physical Units
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Clinical / Pathological Meaning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Glycemic Control} & \texttt{Glucose} & mg/dL & 2-hour plasma
+glucose concentration in an oral glucose tolerance test (OGTT). Primary
+diagnostic criterion for diabetes. \\
+& \texttt{Insulin} & \(\mu\text{U/mL}\) & 2-hour post-prandial serum
+insulin level. Reflects pancreatic beta-cell secretion capacity. \\
+\textbf{Adiposity \& Body Mass} & \texttt{BMI} & \(\text{kg/m}^2\) &
+Body Mass Index (weight in kg / \(\text{height}^2\) in m). Key indicator
+of insulin resistance. \\
+& \texttt{SkinThickness} & mm & Triceps skinfold thickness. Measures
+subcutaneous adipose tissue deposits. \\
+\textbf{Demographic \& Hereditary} & \texttt{Pregnancies} & Count &
+Number of completed gestational cycles. Gestational diabetes stress
+marker. \\
+& \texttt{Age} & Years & Patient age at clinical examination. Beta-cell
+function declines with age. \\
+& \texttt{BloodPressure} & mm Hg & Diastolic blood pressure. Indicator
+of vascular resistance and metabolic syndrome. \\
+& \texttt{Pedigree} & Unitless & Diabetes Pedigree Function (DPF).
+Scored genetic predisposition based on family history. \\
+\textbf{Target Label} & \texttt{Outcome} & Binary & \(0 =\) Non-diabetic
+(\(N=500, 65.1\%\)), \(1 =\) Diabetic (\(N=268, 34.9\%\)). \\
+\end{longtable}
+
+\subsubsection{3.2 The ``Zero-as-Missing'' Phenomenon \& Leakage-Free
+Imputation}\label{the-zero-as-missing-phenomenon-leakage-free-imputation}
+
+In the raw dataset, measurements that were omitted or unrecorded were
+encoded as \texttt{0}. While \texttt{Pregnancies\ =\ 0} is biologically
+valid, values such as \texttt{Glucose\ =\ 0},
+\texttt{BloodPressure\ =\ 0}, or \texttt{BMI\ =\ 0} represent
+\textbf{biological impossibilities}: - \texttt{Glucose}: 5 zero values
+(\(0.65\%\)) - \texttt{BloodPressure}: 35 zero values (\(4.56\%\)) -
+\texttt{BMI}: 11 zero values (\(1.43\%\)) - \texttt{SkinThickness}: 227
+zero values (\(29.56\%\)) - \texttt{Insulin}: 374 zero values
+(\(48.70\%\))
+
+\textbf{Preprocessing Pipeline:} 1. \textbf{Stratified Split
+(60/20/20):} Before any imputation or scaling, the dataset is
+partitioned using fixed random seed 42 into: - \textbf{Training Set
+(\(\mathcal{D}_{\text{train}}\)):} 460 patients (299 healthy, 161
+diabetic) - \textbf{Validation Set (\(\mathcal{D}_{\text{val}}\)):} 154
+patients (100 healthy, 54 diabetic) - \textbf{Test Set
+(\(\mathcal{D}_{\text{test}}\)):} 154 patients (101 healthy, 53
+diabetic) 2. \textbf{Leakage-Free Imputation:} Medians are calculated
+\textbf{strictly on positive values from the training partition only}: -
+\texttt{Glucose}: 117.0 mg/dL - \texttt{BloodPressure}: 72.0 mm Hg -
+\texttt{SkinThickness}: 29.0 mm - \texttt{Insulin}: 125.0
+\(\mu\text{U/mL}\) - \texttt{BMI}: 32.3 \(\text{kg/m}^2\) Validation and
+test missing values are imputed using these exact training medians,
+preventing data leakage. 3. \textbf{Dual Feature Scaling:} -
+\textbf{Standardization (Z-score):}
+\(\tilde{x} = (x - \mu_{\text{train}}) / \sigma_{\text{train}}\) for the
+MLP neural network to ensure smooth gradient descent. - \textbf{Min-Max
+Normalization:}
+\(\tilde{x} = (x - x_{\text{min}}) / (x_{\text{max}} - x_{\text{min}}) \in [0, 1]\)
+for the ANFIS neuro-fuzzy system to establish bounded, interpretable
+linguistic universes of discourse. 4. \textbf{Synthetic Oracle Sampling
+(\(N_{\text{synth}} = 2{,}000\)):} We sample 2,000 synthetic patient
+vectors uniformly within the clinical feature hypercube and query the
+trained neural network to label them. This populates sparse boundary
+regions, giving the fuzzy surrogate rich decision-boundary information.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{4. The Core Techniques Used: Step-by-Step Technical
+Breakdown}\label{the-core-techniques-used-step-by-step-technical-breakdown}
+
+\begin{verbatim}
+Raw Patient Records
+       │
+       ▼
+[Stage 1: Train Neural Network (MLP 8-8-1)] ──► Produces Black-Box Predictions (ROC-AUC: 0.797)
+       │
+       ▼
+[Stage 2: Permutation Feature Importance]  ──► Isolates Top 4 Drivers: Glucose, BMI, Age, Pregnancies
+       │
+       ▼
+[Stage 3: Fuzzy C-Means (FCM) Clustering] ──► Discovers 8 Patient Prototypes (Prevents 3^4=81 explosion)
+       │
+       ▼
+[Stage 4: Shouldered Gaussian Memberships]──► Low, Medium, High terms with flat saturation shoulders
+       │
+       ▼
+[Stage 5: 5-Layer TSK ANFIS Architecture]  ──► Fuzzification → T-Norm → Normalize → Consequent → Sum
+       │
+       ▼
+[Stage 6: Hybrid Learning Optimization]   ──► Ridge Least Squares (Consequents) + Adam (Premises)
+       │
+       ▼
+[Stage 7: Semantic Integrity Constraints] ──► Enforces Low < Med < High & Drift bounds (Anti-Collapse)
+       │
+       ▼
+[Stage 8: Greedy Backward Rule Pruning]   ──► Prunes conditions & rules (8 rules → 4 compact rules)
+       │
+       ▼
+[Stage 9: Clinical Deployment & Telemetry]──► 92.2% Test Fidelity, Sub-5ms Live Interactive Web Dashboard
+\end{verbatim}
+
+\subsubsection{4.1 Stage 1: The Black-Box Neural Network
+(StreamingMLP)}\label{stage-1-the-black-box-neural-network-streamingmlp}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Architecture:} Feedforward Multi-Layer Perceptron (8 input
+  features \(\to\) 8 hidden neurons with ReLU activation \(\to\) 1
+  output neuron with Sigmoid activation).
+\item
+  \textbf{Complexity:} Only 81 trainable parameters
+  (\((8 \times 8 + 8) + (8 \times 1 + 1) = 81\)), avoiding severe
+  overfitting on small clinical cohorts.
+\item
+  \textbf{Optimization:} Adam optimizer (\(\beta_1=0.9, \beta_2=0.999\),
+  learning rate \(\eta=0.01\)), regularized binary cross-entropy loss
+  with L2 penalty (\(\alpha=1.0\)).
+\item
+  \textbf{Performance:} 70.1\% test accuracy, 0.797 ROC-AUC, 5-fold CV
+  score of \(0.826 \pm 0.017\).
+\end{itemize}
+
+\subsubsection{4.2 Stage 2: Permutation Feature Importance
+(PFI)}\label{stage-2-permutation-feature-importance-pfi}
+
+If we fed all 8 features into a fuzzy system with 3 linguistic terms
+each, grid partitioning would generate
+\(3^8 = \mathbf{6{,}561 \text{ rules}}\)---an impossible cognitive
+burden. To reduce dimensionality principledly, we measure how much the
+neural network's cross-entropy loss degrades when each feature column is
+randomly shuffled: 1. \textbf{Glucose:} 43.8\% importance share (Loss
+increase +0.231) --- \textbf{Selected (Rank 1)} 2. \textbf{BMI:} 20.8\%
+importance share (Loss increase +0.110) --- \textbf{Selected (Rank 2)}
+3. \textbf{Age:} 9.7\% importance share (Loss increase +0.051) ---
+\textbf{Selected (Rank 3)} 4. \textbf{Pregnancies:} 8.6\% importance
+share (Loss increase +0.045) --- \textbf{Selected (Rank 4)} 5.
+\emph{Non-selected features:} BloodPressure (5.9\%), Insulin (4.8\%),
+SkinThickness (3.4\%), Pedigree (3.0\%). Selecting the top 4 salient
+features captures \textbf{82.9\% of the network's predictive mass},
+while shrinking the input dimensionality from 8 down to 4.
+
+\subsubsection{4.3 Stage 3: Data-Driven Fuzzy C-Means (FCM)
+Clustering}\label{stage-3-data-driven-fuzzy-c-means-fcm-clustering}
+
+Even with 4 features, full grid partitioning produces
+\(3^4 = \mathbf{81 \text{ rules}}\). To solve this, we run \textbf{Fuzzy
+C-Means clustering} (Bezdek, 1981) with fuzziness exponent \(m=2.0\) on
+the 4-dimensional normalized patient data. FCM discovers \(C=8\)
+multi-dimensional cluster centroids (patient prototypes) that reflect
+actual clinical patterns, directly initializing \textbf{8 candidate
+rules}.
+
+\subsubsection{4.4 Stage 4: Shouldered Gaussian Membership
+Functions}\label{stage-4-shouldered-gaussian-membership-functions}
+
+Standard Gaussian curves decay to zero at extremes. For a patient with
+extreme glucose (\(\ge 200\) mg/dL), a standard Gaussian would output
+near-zero membership, leaving the patient with no firing rules! We
+implement \textbf{monotonic flat boundary shoulders}: -
+\textbf{\texttt{Low}:} Gaussian curve for \(x \ge c_{\text{Low}}\), but
+remains \textbf{flat at 1.0} for all \(x \le c_{\text{Low}}\). -
+\textbf{\texttt{Medium}:} Standard bell-shaped Gaussian centered at
+\(c_{\text{Med}}\). - \textbf{\texttt{High}:} Gaussian curve for
+\(x \le c_{\text{High}}\), but remains \textbf{flat at 1.0} for all
+\(x \ge c_{\text{High}}\). This guarantees that severely ill patients
+always receive full membership in \emph{High}, completely eliminating
+unhandled edge cases.
+
+\subsubsection{4.5 Stage 5: Five-Layer Takagi-Sugeno-Kang (TSK) ANFIS
+Architecture}\label{stage-5-five-layer-takagi-sugeno-kang-tsk-anfis-architecture}
+
+The extracted system is executed through 5 transparent feedforward
+layers: - \textbf{Layer 1 (Fuzzification):} Computes continuous
+membership grades \(\mu_{jt}(x_j) \in [0, 1]\) for each feature in
+\emph{Low}, \emph{Medium}, or \emph{High}. - \textbf{Layer 2 (Rule
+Firing via Product T-Norm):} Multiplies memberships across the active
+conditions of rule \(r\):
+\[w_r = \prod_{j \in \text{Cond}(r)} \mu_{j, A_{rj}}(x_j)\] We use the
+differentiable Product operator (\(\times\)) rather than the Min
+(\(\min\)) operator, ensuring smooth gradient propagation. -
+\textbf{Layer 3 (Normalization):} Calculates the relative firing weight
+of each rule:
+\[\bar{w}_r = \frac{w_r}{\sum_{k=1}^R w_k}, \quad \text{such that } \sum_{r=1}^R \bar{w}_r = 1.0\]
+- \textbf{Layer 4 (Rule Consequents):} In zero-order TSK, each rule
+outputs a fixed risk scalar \(p_r \in [0, 1]\). - \textbf{Layer 5
+(Defuzzified Output):} Calculates the final patient diabetes risk score
+as a weighted sum: \[y = \sum_{r=1}^R \bar{w}_r \cdot p_r\]
+
+\subsubsection{4.6 Stage 6: Hybrid Learning
+Optimization}\label{stage-6-hybrid-learning-optimization}
+
+ANFIS updates its parameters through a fast, stable two-step hybrid
+algorithm: 1. \textbf{Forward Pass (Least Squares for Consequents):}
+With Gaussian membership curves held fixed, the rule output risk weights
+\(\mathbf{p} = [p_1, \dots, p_R]^T\) are solved in \textbf{a single
+mathematical step} using Ridge Regularized Least Squares (RLS):
+\[\mathbf{p}^* = (\bar{\mathbf{W}}^T \bar{\mathbf{W}} + \lambda \mathbf{I})^{-1} \bar{\mathbf{W}}^T \mathbf{t}\]
+where \(\mathbf{t}\) contains the continuous probabilities output by the
+neural network. 2. \textbf{Backward Pass (Gradient Descent for
+Premises):} With consequents \(\mathbf{p}\) fixed, prediction errors
+\((y_i - t_i)\) are backpropagated to update the Gaussian centers
+(\(c\)) and widths (\(\sigma\)) using the Adam optimizer
+(\(\eta=0.01\)).
+
+\subsubsection{4.7 Stage 7: Semantic Integrity Preservation
+Constraints}\label{stage-7-semantic-integrity-preservation-constraints}
+
+Unconstrained gradient descent can cause \textbf{semantic
+collapse}---where the \emph{Low} center drifts higher than the
+\emph{High} center, or curves shrink into needle-thin spikes. After
+every training iteration, three geometric constraints are enforced: 1.
+\textbf{Strict Term Ordering:}
+\(c_{\text{Low}} < c_{\text{Med}} < c_{\text{High}}\) (enforced with a
+minimum gap of \(0.05\)). 2. \textbf{Bounded Anchor Drift:} Centers
+cannot drift more than \(\pm 0.10\) from their original data-derived
+cluster centers (\(|c - c^{(0)}| \le 0.10\)). 3. \textbf{Minimum Width
+Floor:} Gaussian widths are bounded below by \(\sigma \ge 0.05\) to
+prevent delta-function spikes.
+
+\subsubsection{4.8 Stage 8: Greedy Backward Rule
+Pruning}\label{stage-8-greedy-backward-rule-pruning}
+
+The initialized 8-rule system contains redundant conditions (e.g., if a
+rule fires whenever Glucose is High regardless of Age, Age is
+redundant). We run an automated \textbf{two-check greedy backward
+elimination} algorithm: 1. Iteratively test deleting each condition one
+by one. 2. An edit is accepted if and only if: - Holdout validation
+fidelity drops by less than the user tolerance
+(\(\Delta \mathcal{F}_{\text{val}} \le 0.01\)). - Absolute patient
+probability error remains bounded (\(\text{MAE} \le 0.05\)). 3. If all
+conditions in a rule become empty, the entire rule is pruned.
+\textbf{Result:} The rule base drops from \textbf{8 rules and 32
+conditions} down to \textbf{4 compact rules and 12 conditions}---a
+\textbf{96\% complexity reduction} from the theoretical grid while
+retaining \textbf{92.2\% test fidelity}.
+
+\subsubsection{4.9 Stage 9: Safety Diagnostics \&
+Traceability}\label{stage-9-safety-diagnostics-traceability}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Hand Traceability:} The exact calculation for any patient can
+  be computed on a whiteboard in 30 seconds using standard arithmetic.
+\item
+  \textbf{Weak-Match / Out-of-Distribution Diagnostic Alert:} The
+  maximum raw firing strength is tracked:
+  \[\mathcal{S}_{\text{match}} = \max_{r=1 \dots R} w_r\] If an atypical
+  patient arrives whose clinical profile does not match any known
+  prototype (e.g., an elderly, severely malnourished patient with
+  extreme glucose), \(\mathcal{S}_{\text{match}}\) drops below \(0.20\).
+  The system immediately triggers an amber/red \textbf{``Weak Match: Out
+  of Distribution''} alert, warning doctors that the automated system
+  cannot reliably evaluate this patient---preventing silent AI errors.
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{5. How to Launch and Run the
+Project}\label{how-to-launch-and-run-the-project}
+
+\subsubsection{5.1 System Requirements \&
+Verification}\label{system-requirements-verification}
+
+The project runs on standard Python 3.10+ (tested on Python 3.13) with
+standard scientific computing packages: - \texttt{fastapi},
+\texttt{uvicorn}, \texttt{starlette} (Web server \& REST API) -
+\texttt{numpy}, \texttt{pandas}, \texttt{scipy} (Data handling \& linear
+algebra) - \texttt{pytest} (Automated testing suite)
+
+\subsubsection{5.2 Starting the Web
+Server}\label{starting-the-web-server}
+
+Open PowerShell or your command terminal and navigate to the project
+root:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cd}\NormalTok{ d}\OperatorTok{:}\NormalTok{\textbackslash{}Fuzzy\_Project\textbackslash{}Fuzzy\_Project}
+\NormalTok{uvicorn webapp}\OperatorTok{.}\FunctionTok{server}\OperatorTok{:}\NormalTok{app }\OperatorTok{{-}{-}}\NormalTok{host }\DecValTok{127.0}\OperatorTok{.}\DecValTok{0.1} \OperatorTok{{-}{-}}\NormalTok{port }\DecValTok{8000}
+\end{Highlighting}
+\end{Shaded}
+
+When successful, the terminal displays:
+
+\begin{verbatim}
+INFO:     Started server process
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+\end{verbatim}
+
+\subsubsection{5.3 Opening the Dashboard}\label{opening-the-dashboard}
+
+Open your browser and navigate to: \textbf{\url{http://127.0.0.1:8000}}
+
+\subsubsection{5.4 Running the Automated Test
+Suite}\label{running-the-automated-test-suite}
+
+To verify the integrity of all algorithmic modules, execute pytest:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cd}\NormalTok{ d}\OperatorTok{:}\NormalTok{\textbackslash{}Fuzzy\_Project\textbackslash{}Fuzzy\_Project}
+\NormalTok{pytest tests}\OperatorTok{/}
+\end{Highlighting}
+\end{Shaded}
+
+All \textbf{26 tests} will pass in \textasciitilde6 seconds: -
+\texttt{test\_data.py}: Verifies stratified splits, median imputation,
+and normalization. - \texttt{test\_blackbox.py}: Verifies MLP forward
+pass and permutation feature importance. - \texttt{test\_fcm.py}:
+Verifies Fuzzy C-Means convergence and membership constraints. -
+\texttt{test\_anfis.py}: Verifies 5-layer forward propagation, Ridge
+RLS, and hybrid learning. - \texttt{test\_metrics\_and\_rules.py}:
+Verifies greedy pruning and fidelity metrics. -
+\texttt{test\_webapp.py}: Verifies FastAPI REST endpoints and SSE
+telemetry streams.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{6. Complete Web Dashboard Walkthrough (What Every Element
+Means)}\label{complete-web-dashboard-walkthrough-what-every-element-means}
+
+The web dashboard is divided into four main functional views accessible
+via the top navigation bar.
+
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  GLASS-BOX INSIGHT     [1 · Train] [2 · Explore] [3 · Edit rules] [4 · Runs] │
+└──────────────────────────────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsubsection{Topbar \& Global Controls}\label{topbar-global-controls}
+
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [Logo] Glass-Box Insight                         [Run #1 · 4 rules]  [ ◐ ]   │
+│        A neural network decides. Fuzzy rules explain why.                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Brand \& Tagline:} Identifies the system and its pedagogical
+  neuro-fuzzy surrogate role.
+\item
+  \textbf{Navigation Tabs:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{1\ ·\ Train}: Configure models and watch the complete
+    training pipeline run live.
+  \item
+    \texttt{2\ ·\ Explore}: Interactive clinical sliders and real-time
+    dual-model patient diagnosis.
+  \item
+    \texttt{3\ ·\ Edit\ rules}: Live interactive rule editor for
+    human-in-the-loop counterfactual simulation.
+  \item
+    \texttt{4\ ·\ Compare\ runs}: Pareto frontier scatter chart and
+    historical run logs.
+  \end{itemize}
+\item
+  \textbf{Run Pill (\texttt{\#run-pill}):}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Shows the status of the currently loaded model (e.g.,
+    \texttt{No\ run\ yet} or
+    \texttt{Run\ \#1\ ·\ 4\ rules\ ·\ 92.2\%\ fidelity}).
+  \item
+    Turns green on successful training completion or yellow while
+    training is actively streaming.
+  \end{itemize}
+\item
+  \textbf{Theme Toggle (\texttt{◐}):} Instantly toggles between
+  high-contrast Dark Mode and clean Clinical Light Mode.
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsubsection{View 1: Train (Settings, Stepper, \& Real-Time
+Telemetry)}\label{view-1-train-settings-stepper-real-time-telemetry}
+
+This view allows you to configure hyper-parameters, initiate training,
+and watch the system learn in real time via Server-Sent Events (SSE).
+
+\begin{verbatim}
+┌───────────────────────────┬──────────────────────────────────────────────────┐
+│  SETTINGS                 │  [Data]─►[Network]─►[Importance]─►[ANFIS]─►[Prune]│
+│                           ├─────────────────────────┬────────────────────────┤
+│  Black Box Neural Network │ ① Neural Network        │ ② Feature Importance   │
+│  - Hidden layers: 8       │   [Loss Decay Chart]    │   [PFI Bar Chart]      │
+│  - L2 penalty α: 1        ├─────────────────────────┴────────────────────────┤
+│                           │ ③ ANFIS Learns to Imitate Network                │
+│  Fuzzy Explainer (ANFIS)  │   [Hybrid Loss Chart] | [Membership Curves Low/H]│
+│  - Inputs: 4              ├──────────────────────────────────────────────────┤
+│  - Terms: 3 (Low/Med/High)│ ④ Rule Base: Proposed by FCM, Then Pruned        │
+│  - Clusters: 8            │   [Active Rules List] | [Pruning Event Log]      │
+│  - Target: The network    ├──────────────────────────────────────────────────┤
+│                           │ ⑤ Evaluation Results on 154 Test Patients        │
+│  [ ▶ Train ]  [ Reset ]   │   [ 92.2% Fidelity ] [ 70.1% Acc ] [ 0.797 AUC ] │
+└───────────────────────────┴──────────────────────────────────────────────────┘
+\end{verbatim}
+
+\paragraph{The Settings Form (Left
+Sidebar)}\label{the-settings-form-left-sidebar}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Black box · neural network:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Hidden\ layers}: Selects the network depth
+    (\texttt{8\ neurons} (default), \texttt{16\ neurons},
+    \texttt{16\ →\ 8\ neurons}, or \texttt{32\ →\ 16\ neurons}).
+  \item
+    \texttt{L2\ penalty\ α}: Weight decay regularization
+    (\(0.001, 0.01, 0.1, 1.0\)). Higher \(\alpha\) prevents overfitting.
+  \item
+    \texttt{Choose\ size\ and\ α\ by\ 5-fold\ cross-validation}:
+    Checkbox that runs an automated grid search over architectures
+    before training.
+  \end{itemize}
+\item
+  \textbf{Fuzzy explainer · ANFIS:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Inputs\ used\ by\ the\ rules} (Slider 2 to 6): Controls how
+    many salient features from PFI are passed to the fuzzy explainer
+    (Default: 4).
+  \item
+    \texttt{Terms\ per\ input}: Choose between 2 linguistic terms
+    (\emph{Low}, \emph{High}) or 3 terms (\emph{Low}, \emph{Medium},
+    \emph{High}).
+  \item
+    \texttt{FCM\ clusters} (Slider 2 to 16): Upper bound on initial
+    candidate rules (Default: 8).
+  \item
+    \texttt{THEN-part}: Choose between \textbf{Zero-order TSK} (Constant
+    scalar, e.g., \(\text{Risk} = 0.85\)) or \textbf{First-order TSK}
+    (Linear polynomial formula).
+  \item
+    \texttt{Training\ epochs} (Slider 20 to 600): Number of hybrid
+    learning cycles (Default: 100).
+  \item
+    \texttt{Imitate}:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      \texttt{The\ network\ (explainer)}: True surrogate mode. ANFIS
+      imitates the neural network's continuous probabilities.
+    \item
+      \texttt{The\ true\ diagnosis\ (control)}: Trains the fuzzy system
+      directly on ground-truth \(\{0, 1\}\) clinical labels (serves as
+      an experimental control baseline).
+    \end{itemize}
+  \item
+    \texttt{Keep\ terms\ meaningful\ (constraints)}: Enforces ordering
+    (\(c_{\text{Low}} < c_{\text{Med}} < c_{\text{High}}\)) and prevents
+    semantic collapse.
+  \end{itemize}
+\item
+  \textbf{Data \& simplification:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Synthetic\ patients\ asked\ to\ the\ network} (0 to 4,000):
+    Number of synthetic oracle neighborhood queries used to populate
+    boundary regions (Default: 2,000).
+  \item
+    \texttt{Prune\ conditions\ and\ rules}: Enables the automated greedy
+    backward pruning engine.
+  \item
+    \texttt{Allowed\ fidelity\ loss\ while\ pruning} (\(0\%\) to
+    \(5\%\)): Maximum permitted validation fidelity drop per pruning
+    step (Default: \(1\%\)).
+  \item
+    \texttt{Random\ seed}: Controls synthetic sampling and cluster
+    initialization (Default: 42).
+  \item
+    \texttt{Slow\ motion}: Adds an artificial 25ms delay per epoch so
+    users can visually watch the curves move live on projector screens.
+  \end{itemize}
+\item
+  \textbf{Action Buttons:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{▶\ Train}: Starts the asynchronous training pipeline.
+  \item
+    \texttt{Report\ settings}: Restores all parameters to the exact
+    benchmark configuration reported in the academic paper.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{The 7-Stage Pipeline
+Stepper}\label{the-7-stage-pipeline-stepper}
+
+As training executes, the horizontal stepper highlights the active
+algorithmic stage: 1. \texttt{Data}: Ingestion, stratified splitting,
+and median imputation. 2. \texttt{Neural\ network}: Backpropagation
+training of the MLP. 3. \texttt{Importance}: Permutation feature
+importance shuffling. 4. \texttt{FCM\ rules}: Unsupervised prototype
+clustering. 5. \texttt{ANFIS}: Hybrid optimization of premise curves and
+consequent weights. 6. \texttt{Pruning}: Backward greedy elimination of
+redundant conditions. 7. \texttt{Evaluation}: Final benchmarking across
+the 154 holdout test patients.
+
+\paragraph{Live Telemetry Dashboard
+Cards}\label{live-telemetry-dashboard-cards}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Card ① Neural Network Learns:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Displays the live training loss curve (Binary Cross-Entropy)
+    decreasing across epochs.
+  \item
+    KPI badge shows final training loss and convergence epoch.
+  \end{itemize}
+\item
+  \textbf{Card ② What the Network Relies On:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Horizontal bar chart showing the permutation importance share of
+    each clinical feature.
+  \item
+    The top features selected for the fuzzy explainer are highlighted in
+    bright blue.
+  \end{itemize}
+\item
+  \textbf{Card ③ ANFIS Learns to Imitate the Network:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Left:} Mean Squared Error (MSE) loss decay curve as ANFIS
+    imitates the neural network's output probabilities.
+  \item
+    \textbf{Right (MF Grid):} Real-time animated Gaussian membership
+    curves for Glucose, BMI, Age, and Pregnancies. Dashed curves
+    represent the initial cluster positions; solid lines show the curves
+    being fine-tuned live by gradient descent.
+  \end{itemize}
+\item
+  \textbf{Card ④ Rule Base: Proposed by FCM, Then Pruned:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Left:} The live rule list. Rules that get completely pruned
+    disappear from this list.
+  \item
+    \textbf{Right (Pruning Event Log):} Real-time text log of every
+    accepted pruning decision (e.g.,
+    \texttt{Pruned\ Age\ is\ High\ from\ Rule\ 3\ (Fidelity:\ 94.8\%\ -\textgreater{}\ 94.6\%)}).
+  \end{itemize}
+\item
+  \textbf{Card ⑤ Evaluation Results:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Unrolls once training finishes, presenting holdout test metrics:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      \textbf{Fidelity:} Percentage of test patients where ANFIS and the
+      Neural Network assign the identical diagnostic class (\(92.2\%\)).
+    \item
+      \textbf{NN Test Accuracy:} Diagnostic accuracy of the black box
+      (\(70.1\%\)).
+    \item
+      \textbf{Surrogate Accuracy:} Diagnostic accuracy of the fuzzy
+      explainer (\(72.1\%\)).
+    \item
+      \textbf{ROC-AUC:} Area under the ROC curve (\(0.797\)).
+    \end{itemize}
+  \item
+    Action buttons allow instant transition to \textbf{``Explore
+    patients →''} or \textbf{``Edit the rules →''}.
+  \end{itemize}
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsubsection{View 2: Explore (Clinical Sliders, Dual Gauges, \&
+Traceability)}\label{view-2-explore-clinical-sliders-dual-gauges-traceability}
+
+The Explore view is the primary clinical auditing workstation where a
+physician can evaluate real patients or test hypothetical ``what-if''
+scenarios.
+
+\begin{verbatim}
+┌───────────────────────┬──────────────────────────────────────────────────────┐
+│  PATIENT SELECTION    │  CONCURRENT DUAL VERDICT                             │
+│  [ Patient #152    ▼] │   [ Black Box MLP ]         [ Glass-Box ANFIS ]      │
+│                       │      83.7% Risk                 84.3% Risk           │
+│  CLINICAL SLIDERS     │     (Diabetic)                 (Diabetic)            │
+│  Glucose:    197 mg/dL│   [Badge: Perfect Agreement]  [Badge: Strong Match]  │
+│  BMI:        34.7     ├──────────────────────────────────────────────────────┤
+│  Age:        31 yrs   │  WHY: THE RULES THAT FIRED                           │
+│  Pregnancies: 2       │  Stacked Bar: [██████████████████████░░░░] 84.3% Risk│
+│                       │  Rule 4 (Diabetic):  Weight 98.4% | Contribution 0.84│
+│  [True Label: 1]      │  Rule 1 (Healthy):   Weight  1.6% | Contribution 0.00│
+│                       ├──────────────────────────────────────────────────────┤
+│                       │  FUZZIFICATION BREAKDOWN                             │
+│                       │  Glucose (197): Low 0.00 | Med 0.00 | High 1.00      │
+│                       │  BMI (34.7):    Low 0.00 | Med 0.65 | High 0.35      │
+└───────────────────────┴──────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\paragraph{1. Patient Selector \& Input Sliders (Left
+Sidebar)}\label{patient-selector-input-sliders-left-sidebar}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Start from Dropdown:} Allows selecting any of the 154 holdout
+  test patients or predefined clinical prototypes:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Diabetic\ Prototype}: Severe hyperglycemia and high BMI.
+  \item
+    \texttt{Healthy\ Prototype}: Low glucose, lean BMI, young age.
+  \item
+    \texttt{Boundary\ Ambiguity\ Case}: Borderline glucose (125 mg/dL)
+    near clinical diagnostic thresholds.
+  \item
+    \texttt{Atypical\ Outlier\ Case}: Severe hyperglycemia in an elderly
+    patient with lean BMI (triggers weak match).
+  \end{itemize}
+\item
+  \textbf{Interactive Sliders:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Glucose} (\(0\) to \(200\) mg/dL, step \(1\))
+  \item
+    \texttt{BMI} (\(15.0\) to \(60.0 \text{ kg/m}^2\), step \(0.1\))
+  \item
+    \texttt{Age} (\(21\) to \(85\) years, step \(1\))
+  \item
+    \texttt{Pregnancies} (\(0\) to \(17\), step \(1\))
+  \end{itemize}
+\item
+  Whenever a slider is dragged, an asynchronous call is dispatched to
+  the Python backend; predictions, gauges, and rule activations update
+  in \textbf{less than 5 milliseconds}.
+\end{itemize}
+
+\paragraph{2. Concurrent Dual Verdict
+Gauges}\label{concurrent-dual-verdict-gauges}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Gauge 1 (Neural Network):} Displays the continuous probability
+  \(P_{\text{NN}} \in [0\%, 100\%]\) produced by the multi-layer
+  perceptron.
+\item
+  \textbf{Gauge 2 (Glass-Box Fuzzy):} Displays the exact defuzzified
+  probability \(P_{\text{fuzzy}} \in [0\%, 100\%]\) produced by the
+  ANFIS surrogate.
+\item
+  \textbf{Diagnostic Status Badges:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Agreement\ Badge}: Shows \texttt{Agreement} (both predict
+    healthy or both predict diabetic) or \texttt{Disagreement} (if the
+    models cross the 0.50 boundary).
+  \item
+    \texttt{Match-Strength\ Badge}: Shows \texttt{Strong\ Match}
+    (\(\mathcal{S}_{\text{match}} \ge 0.50\)), \texttt{Moderate\ Match},
+    or \texttt{Weak\ Match:\ Out\ of\ Distribution}
+    (\(\mathcal{S}_{\text{match}} < 0.20\), highlighted in amber/red).
+  \end{itemize}
+\end{itemize}
+
+\paragraph{3. Card ``Why: The Rules That
+Fired''}\label{card-why-the-rules-that-fired}
+
+This panel provides complete, transparent decision decomposition: -
+\textbf{Stacked Probability Bar:} Visualizes total risk. Green segments
+represent contributions from non-diabetic rules; red segments represent
+contributions from diabetic rules. - \textbf{Fired Rules Breakdown
+Table:} - \textbf{Rule Sentence:} Full linguistic text (e.g.,
+\texttt{IF\ Glucose\ is\ High\ AND\ BMI\ is\ Medium\ THEN\ Risk\ =\ 0.85}).
+- \textbf{Raw Firing Strength (\(w_r\)):} The product of membership
+grades across active conditions. - \textbf{Normalized Weight
+(\(\bar{w}_r\)):} The rule's percentage share of the overall clinical
+decision (\(\sum \bar{w}_r = 100\%\)). - \textbf{Consequent Risk
+(\(p_r\)):} The base risk score associated with this rule prototype. -
+\textbf{Risk Contribution:} Exactly equals \(\bar{w}_r \times p_r\). The
+sum of all contributions \textbf{adds up exactly to the final fuzzy risk
+percentage}.
+
+\paragraph{4. Card ``Fuzzification
+Breakdown''}\label{card-fuzzification-breakdown}
+
+Visualizes exactly how the patient's raw clinical measurements map into
+linguistic terms: - Displays 4 plots (one for each feature) with
+\emph{Low}, \emph{Medium}, and \emph{High} curves. - A vertical
+indicator line marks the patient's current slider value. - Clear numeric
+tags show the exact membership grade (e.g.,
+\(\mu_{\text{High}}(\text{Glucose}) = 0.98\)).
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsubsection{View 3: Edit Rules (Human-in-the-Loop Counterfactual
+Simulation)}\label{view-3-edit-rules-human-in-the-loop-counterfactual-simulation}
+
+The Edit Rules view allows clinical domain experts to inspect, modify,
+add, or delete rules, and observe the immediate mathematical impact on
+system fidelity.
+
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  EDIT THE RULE BASE                 [ + Add Rule ]  [ Reset to Trained ]     │
+│  Holdout Test Fidelity: 92.2% | Conditions: 12 | Rules: 4                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  RULE 1 (Healthy Baseline)                                                   │
+│  IF [Glucose is Low ▾] [×] AND [BMI is Low ▾] [×]     THEN Risk: 0.08 [Save] │
+│  [ + Add condition ]                                            [Delete Rule]│
+├──────────────────────────────────────────────────────────────────────────────┤
+│  RULE 4 (Overt Diabetes)                                                     │
+│  IF [Glucose is High ▾] [×] AND [BMI is High ▾] [×]    THEN Risk: 0.85 [Save] │
+│  [ + Add condition ]                                            [Delete Rule]│
+└──────────────────────────────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\paragraph{How to Interact with the Rule
+Editor}\label{how-to-interact-with-the-rule-editor}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Change a Condition:} Click the dropdown on any condition pill
+  (e.g., change \texttt{Glucose\ is\ High} to
+  \texttt{Glucose\ is\ Medium}).
+\item
+  \textbf{Delete a Condition:} Click the small \texttt{×} icon next to a
+  condition to remove it from the rule.
+\item
+  \textbf{Add a Condition:} Click \texttt{+\ Add\ condition} to
+  introduce an additional biomarker constraint to an existing rule.
+\item
+  \textbf{Delete a Rule:} Click \texttt{Delete\ Rule} to remove an
+  entire rule from the knowledge base.
+\item
+  \textbf{Add a Rule:} Click \texttt{+\ Add\ rule} at the top right to
+  define an entirely new clinical scenario.
+\item
+  \textbf{Instantaneous Re-Fitting (Ridge RLS):}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The moment any rule edit is made, the Python backend executes Ridge
+    Regularized Least Squares across the training cohort in
+    \textbf{under 3 milliseconds}.
+  \item
+    Consequent risk values (\(p_r\)) re-optimize instantly.
+  \item
+    The top banner immediately updates the \textbf{Test-Set Fidelity}
+    score (e.g., showing if deleting a condition caused fidelity to drop
+    from \(92.2\%\) to \(89.5\%\)).
+  \end{itemize}
+\item
+  \textbf{Reset to Trained Rules:} Click
+  \texttt{Reset\ to\ trained\ rules} at any time to undo all manual
+  edits and restore the algorithmically optimized model.
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsubsection{View 4: Compare Runs (Pareto Frontier \& Historical
+Benchmarks)}\label{view-4-compare-runs-pareto-frontier-historical-benchmarks}
+
+This view provides comprehensive experimental auditing, allowing
+researchers and professors to compare multiple runs across different
+hyper-parameter settings.
+
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  PARETO FRONTIER: FIDELITY VS. COMPLEXITY                                    │
+│                                                                              │
+│   Fidelity (%)                                                               │
+│   100% ┼                                                                     │
+│        │               ● (Run #1: ANFIS 4 rules, 12 cond, 92.2% fidelity)    │
+│    90% ┼         ●     ▲ (TREPAN Decision Tree: 12 cond, 84.1% fidelity)     │
+│        │                                                                     │
+│    80% ┼   ■ (Direct Fuzzy: 12 cond, 78.4% fidelity)                         │
+│        └───────┬──────────────┬──────────────┬──────────────┬────────────►   │
+│                5             10             15             20  Conditions    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  RUNS AUDIT TABLE                                                            │
+│  Run ID   | Model Type | Rules | Conditions | Test Fidelity | ROC-AUC | Date │
+│  Run #1   | ANFIS (NN) |   4   |     12     |     92.2%     |  0.797  | ...  │
+│  Run #2   | Tree-Surr  |   6   |     18     |     85.7%     |  0.781  | ...  │
+└──────────────────────────────────────────────────────────────────────────────┘
+\end{verbatim}
+
+\paragraph{Elements of the Compare
+View}\label{elements-of-the-compare-view}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{The Pareto Frontier Scatter Chart:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Y-Axis:} Holdout Test-Set Fidelity (\(\%\) agreement with
+    the Neural Network).
+  \item
+    \textbf{X-Axis:} Model Complexity (Total number of active conditions
+    across all rules).
+  \item
+    \textbf{Optimal Region (Top-Left):} Represents the ideal clinical
+    trade-off---maximum fidelity with minimum cognitive complexity.
+  \item
+    \textbf{Legend Markers:}
+
+    \begin{itemize}
+    \tightlist
+    \item
+      \textbf{Blue Solid Circle (\texttt{●}):} Glass-Box ANFIS surrogate
+      imitating the neural network.
+    \item
+      \textbf{Red Solid Circle (\texttt{●}):} Control fuzzy model
+      trained directly on true labels \(\{0, 1\}\).
+    \item
+      \textbf{Hollow Circle (\texttt{○}):} Model state after manual
+      clinician edits.
+    \item
+      \textbf{Green Triangle (\texttt{▲}):} Decision Tree (TREPAN)
+      baseline of equivalent size.
+    \end{itemize}
+  \end{itemize}
+\item
+  \textbf{Historical Runs Audit Table:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Displays every run executed during the session with its exact
+    hyper-parameter configuration.
+  \item
+    Clicking on any historical row immediately reloads that model into
+    memory, allowing you to re-explore its patients in View 2 or inspect
+    its rules in View 3.
+  \end{itemize}
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{7. Frequently Asked Questions \& Professor Viva Defense
+Guide}\label{frequently-asked-questions-professor-viva-defense-guide}
+
+\subsubsection{Q1: Is this project strictly within the syllabus of our
+course
+(EEO1003)?}\label{q1-is-this-project-strictly-within-the-syllabus-of-our-course-eeo1003}
+
+\textbf{Yes, 100\%.} Every algorithmic component directly implements
+foundational topics from the course domain: - \textbf{Neural Networks:}
+Multi-Layer Perceptrons, backpropagation learning, binary cross-entropy,
+and gradient optimization (grounded in Simon Haykin and Laurene
+Fausett). - \textbf{Fuzzy Logic:} Linguistic variables, continuous
+membership functions, T-norms, zero-order Takagi-Sugeno-Kang fuzzy
+inference, and defuzzification (grounded in Timothy J. Ross and S.N.
+Sivanandam). - \textbf{Neuro-Fuzzy Synthesis:} ANFIS architecture (Jang,
+1993) and Fuzzy C-Means clustering (Bezdek, 1981). - The \emph{only}
+modern addition is the overarching problem formulation: using the
+neuro-fuzzy system as a pedagogical surrogate for Explainable AI (XAI)
+rather than a simple standalone classifier.
+
+\subsubsection{Q2: Why train a Neural Network first if we end up using
+Fuzzy
+Rules?}\label{q2-why-train-a-neural-network-first-if-we-end-up-using-fuzzy-rules}
+
+Because neural networks possess superior non-linear gradient search
+capabilities that find complex decision boundaries in high-dimensional
+continuous data. A fuzzy system initialized from scratch often gets
+trapped in local optima or suffers from the curse of dimensionality
+(\(3^8 = 6{,}561\) rules). By using the \textbf{Pedagogical Surrogate
+Philosophy} (Andrews et al., 1995), the neural network acts as an
+``oracle teacher'', smoothing out noise in the raw dataset. ANFIS then
+distills that teacher's knowledge into 4 clean, human-auditable rules.
+
+\subsubsection{Q3: Why use Zero-Order TSK instead of Mamdani or
+First-Order
+TSK?}\label{q3-why-use-zero-order-tsk-instead-of-mamdani-or-first-order-tsk}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Against Mamdani:} Mamdani uses fuzzy output sets requiring
+  numerical integration (centroid defuzzification), which is
+  computationally expensive and difficult to optimize with gradient
+  descent.
+\item
+  \textbf{Against First-Order TSK:} First-order TSK uses linear
+  hyperplanes in the THEN-part
+  (\(\text{Risk} = a_0 + a_1 x_1 + \dots\)). If the THEN-part is an
+  equation, a doctor still cannot interpret the rule at a glance.
+\item
+  \textbf{Zero-Order TSK Advantage:} The THEN-part is a single,
+  intuitive scalar percentage (\(\text{Risk} = 0.85\)), providing
+  immediate cognitive clarity while remaining 100\% differentiable for
+  hybrid learning.
+\end{itemize}
+
+\subsubsection{Q4: Why use the Product T-Norm instead of the Min
+operator?}\label{q4-why-use-the-product-t-norm-instead-of-the-min-operator}
+
+The standard Zadeh Min operator (\(\min(\mu_1, \mu_2)\)) has
+discontinuous, non-differentiable switching points:
+\(\frac{\partial}{\partial \mu_1} \min(\mu_1, \mu_2) = 0\) whenever
+\(\mu_1 > \mu_2\). This blocks gradient backpropagation to the
+non-minimum feature. The \textbf{Product T-Norm}
+(\(w_r = \mu_1 \times \mu_2 \times \dots\)) is smooth, infinitely
+differentiable everywhere, and ensures that every condition contributes
+proportional gradient information during backward premise tuning.
+
+\subsubsection{Q5: How does the system prevent semantic
+collapse?}\label{q5-how-does-the-system-prevent-semantic-collapse}
+
+In unconstrained ANFIS, gradient descent often causes \emph{Low} and
+\emph{High} membership curves to invert or collapse into sharp delta
+spikes. Our engine enforces \textbf{three strict geometric projection
+steps} after every Adam training step: 1.
+\(c_{\text{Low}} \le c_{\text{Med}} - 0.05\) and
+\(c_{\text{Med}} \le c_{\text{High}} - 0.05\) (ordering constraint). 2.
+\(|c - c^{(0)}| \le 0.10\) (drift bounds from data cluster centers). 3.
+\(\sigma \ge 0.05\) (width floor preventing delta spikes).
+
+\subsubsection{Q6: What happens if an atypical or anomalous patient is
+tested?}\label{q6-what-happens-if-an-atypical-or-anomalous-patient-is-tested}
+
+In black-box models, out-of-distribution patients cause \textbf{silent
+catastrophic failures} (the network confidently emits an incorrect risk
+score). Glass-Box Insight actively computes the match-strength metric:
+\[\mathcal{S}_{\text{match}} = \max_{r=1 \dots R} w_r\] If
+\(\mathcal{S}_{\text{match}} < 0.20\), the patient falls outside the
+support of all extracted clinical prototypes. The dashboard immediately
+triggers an amber/red \textbf{``Weak Match: Out of Distribution''}
+diagnostic flag, warning clinicians to disregard automated scoring and
+conduct direct manual pathology tests.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\emph{Document compiled and verified for the Department of Electrical
+Engineering, Punjab Engineering College (Deemed to be University),
+Chandigarh.}

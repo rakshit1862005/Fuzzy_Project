@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Glass Top Face -->
+    <linearGradient id="glass-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.65"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0.2"/>
+    </linearGradient>
+
+    <!-- Glass Left Face -->
+    <linearGradient id="glass-left" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <!-- Glass Right Face -->
+    <linearGradient id="glass-right" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <!-- Fuzzy Curve Gradient -->
+    <linearGradient id="curve-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <!-- Outer Glow for Badge -->
+    <linearGradient id="border-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App Icon Squircle Background -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg-grad)"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="url(#border-glow)" stroke-width="1.2" opacity="0.6"/>
+
+  <!-- Inside the Glass Box: Neural Nodes and Synaptic Connections -->
+  <line x1="22" y1="32" x2="32" y2="22" stroke="#38bdf8" stroke-width="1.2" opacity="0.45" stroke-dasharray="2,2"/>
+  <line x1="32" y1="22" x2="42" y2="32" stroke="#818cf8" stroke-width="1.2" opacity="0.45" stroke-dasharray="2,2"/>
+  <line x1="22" y1="32" x2="32" y2="42" stroke="#38bdf8" stroke-width="1.2" opacity="0.45" stroke-dasharray="2,2"/>
+  <line x1="42" y1="32" x2="32" y2="42" stroke="#34d399" stroke-width="1.2" opacity="0.45" stroke-dasharray="2,2"/>
+
+  <!-- Neural Nodes -->
+  <circle cx="22" cy="32" r="2.2" fill="#38bdf8"/>
+  <circle cx="42" cy="32" r="2.2" fill="#818cf8"/>
+  <circle cx="32" cy="42" r="2.2" fill="#34d399"/>
+
+  <!-- Explainable Fuzzy Membership Gaussian Bell Curve (Smooth Flow) -->
+  <path d="M 17 37 C 23 37, 26 19, 32 19 C 38 19, 41 37, 47 37" fill="none" stroke="url(#curve-grad)" stroke-width="2.6" stroke-linecap="round"/>
+
+  <!-- Apex Peak Node (Fuzzy Centroid Indicator) -->
+  <circle cx="32" cy="19" r="3" fill="#ffffff"/>
+  <circle cx="32" cy="19" r="1.5" fill="#0ea5e9"/>
+
+  <!-- Isometric Glass Cube Faces (Glass Box) -->
+  <!-- Left Glass Face -->
+  <polygon points="14,23 32,33 32,51 14,41" fill="url(#glass-left)" stroke="#60a5fa" stroke-width="1.2" stroke-linejoin="round" opacity="0.85"/>
+
+  <!-- Right Glass Face -->
+  <polygon points="32,33 50,23 50,41 32,51" fill="url(#glass-right)" stroke="#818cf8" stroke-width="1.2" stroke-linejoin="round" opacity="0.85"/>
+
+  <!-- Top Glass Face (Reflective Lid) -->
+  <polygon points="32,13 50,23 32,33 14,23" fill="url(#glass-top)" stroke="#93c5fd" stroke-width="1.4" stroke-linejoin="round" opacity="0.9"/>
+
+  <!-- Specular Reflection Glare on Top Face -->
+  <line x1="22" y1="18" x2="32" y2="23" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- Front Corner Sheen Edge -->
+  <line x1="32" y1="33" x2="32" y2="51" stroke="#bae6fd" stroke-width="1.4" opacity="0.7"/>
+</svg>

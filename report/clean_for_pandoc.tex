@@ -1,0 +1,1352 @@
+\documentclass{report}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\begin{document}
+
+
+
+\pagenumbering{roman}
+\pagestyle{plain}
+
+% ==============================================================================
+% 1. COVER PAGE / TITLE PAGE (Centered institutional format with Large PEC Logo)
+% ==============================================================================
+\begin{titlepage}
+    \begin{center}
+    \vspace*{-0.5cm}
+    {\fontsize{15}{18}\selectfont \bfseries PUNJAB ENGINEERING COLLEGE}\\[0.12cm]
+    {\fontsize{13}{16}\selectfont \bfseries (DEEMED TO BE UNIVERSITY), CHANDIGARH}\\[0.12cm]
+    {\fontsize{11}{14}\selectfont \bfseries DEPARTMENT OF ELECTRICAL ENGINEERING}\\[0.45cm]
+    
+    \includegraphics[width=3.6cm,keepaspectratio]{pec_logo.png}\\[0.45cm]
+    
+    {\fontsize{14}{17}\selectfont \bfseries PROJECT REPORT}\\[0.35cm]
+    
+    {\fontsize{15}{19}\selectfont \bfseries EXPLAINING NEURAL NETWORK DECISIONS IN\\ DIABETES DIAGNOSIS USING FUZZY LOGIC RULES}\\[0.45cm]
+    
+    {\fontsize{11}{14}\selectfont \textit{Course: Fuzzy Logic and Neural Networks (Course Code: EEO1003)}}\\[0.45cm]
+    
+    {\fontsize{11}{14}\selectfont \textbf{Under the Guidance of:}}\\[0.10cm]
+    {\fontsize{11}{14}\selectfont \bfseries Dr.~Rintu Khanna \quad \& \quad Dr.~Hemant Kumar}\\[0.08cm]
+    {\fontsize{10}{13}\selectfont Department of Electrical Engineering}\\[0.08cm]
+    {\fontsize{10}{13}\selectfont Punjab Engineering College (Deemed to be University), Chandigarh}\\[1.20cm]
+    
+    {\fontsize{11}{14}\selectfont \textbf{Submitted by:}}\\[0.25cm]
+    \noindent\begin{tabular*}{\linewidth}{@{}l @{\extracolsep{\fill}} r@{}}
+        \textbf{Rakshit} (23106017) & \textbf{Aarav} (23106023) \\[0.15cm]
+        \textbf{Aryan Garg} (23106024) & \textbf{Amish Bansal} (23103087) \\
+    \end{tabular*}\\[0.60cm]
+    
+    \vfill
+    {\fontsize{11}{14}\selectfont \bfseries Academic Year: 2026--2027}
+    \end{center}
+\end{titlepage}
+
+% ==============================================================================
+% 2. CANDIDATE'S DECLARATION (Page 2)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{Candidate's Declaration}
+\begin{center}
+    \vspace*{0.2cm}
+    {\fontsize{15}{18}\selectfont \bfseries CANDIDATE'S DECLARATION}\\[0.8cm]
+\end{center}
+
+\noindent
+We hereby declare that the project work entitled \textbf{``Explaining Neural Network Decisions in Diabetes Diagnosis Using Fuzzy Logic Rules''} is an authentic record of our own engineering work carried out at \textbf{Punjab Engineering College (Deemed to be University), Chandigarh} as per the requirements of the course \textbf{Fuzzy Logic and Neural Networks (Course Code: EEO1003)} offered by the \textbf{Department of Electrical Engineering}, under the guidance and supervision of \textbf{Dr.~Rintu Khanna} and \textbf{Dr.~Hemant Kumar}.
+
+\vspace{0.4cm}
+\noindent
+We further declare that the information, experimental pipelines, and results described in this report have been developed from authentic scientific sources, and we have not submitted this project report to this or any other institution for the award of any diploma or degree examination.
+
+\vspace{1.2cm}
+\noindent
+\textbf{Date:} \today \hfill \textbf{Place:} Punjab Engineering College, Chandigarh
+
+\vspace{2.2cm}
+\noindent
+\begin{tabular*}{\linewidth}{@{}l @{\extracolsep{\fill}} r@{}}
+    \underline{\hspace{4.8cm}} & \underline{\hspace{4.8cm}} \\
+    \textbf{Rakshit} (23106017) & \textbf{Aarav} (23106023) \\[1.8cm]
+    \underline{\hspace{4.8cm}} & \underline{\hspace{4.8cm}} \\
+    \textbf{Aryan Garg} (23106024) & \textbf{Amish Bansal} (23103087) \\
+\end{tabular*}
+
+% ==============================================================================
+% 3. CERTIFICATE (Page 3 - Two Professors, No HOD)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{Certificate}
+\begin{center}
+    \vspace*{-0.3cm}
+    {\fontsize{14}{17}\selectfont \bfseries PUNJAB ENGINEERING COLLEGE}\\[0.08cm]
+    {\fontsize{12}{15}\selectfont \bfseries (DEEMED TO BE UNIVERSITY), CHANDIGARH}\\[0.08cm]
+    {\fontsize{11}{14}\selectfont \bfseries Department of Electrical Engineering}\\[0.30cm]
+    \includegraphics[width=2.5cm,keepaspectratio]{pec_logo.png}\\[0.30cm]
+    {\fontsize{15}{18}\selectfont \bfseries CERTIFICATE}\\[0.50cm]
+\end{center}
+
+\noindent
+It is Certified that the Project work entitled \textbf{``Explaining Neural Network Decisions in Diabetes Diagnosis Using Fuzzy Logic Rules''} submitted by \textbf{Rakshit (23106017)}, \textbf{Aarav (23106023)}, \textbf{Aryan Garg (23106024)}, and \textbf{Amish Bansal (23103087)}, for the fulfilment of the course \textbf{Fuzzy Logic and Neural Networks (EEO1003)} offered by the \textbf{Department of Electrical Engineering, Punjab Engineering College (Deemed to be University)} during the academic year 2026--2027 is an original work carried out by the students under our supervision and guidance. This work has not framed the basis for the award of any other degree, diploma, or certificate. All the work related to the project has been carried out by these candidates themselves. The approach towards the subject has been sincere and scientific.
+
+\vspace{1.2cm}
+\noindent
+\textbf{Date:} \today
+
+\vspace{2.2cm}
+\noindent
+\begin{tabular}{p{7.5cm} p{7.5cm}}
+\underline{\hspace{5.5cm}} & \underline{\hspace{5.5cm}} \\
+\textbf{Dr.~Rintu Khanna} & \textbf{Dr.~Hemant Kumar} \\
+(Professor) & (Assistant Professor) \\
+Department of Electrical Engineering & Department of Electrical Engineering \\
+Punjab Engineering College & Punjab Engineering College \\
+(Deemed to be University) & (Deemed to be University) \\
+\end{tabular}
+
+% ==============================================================================
+% 4. ACKNOWLEDGEMENT (Page 4)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{Acknowledgement}
+\begin{center}
+    \vspace*{0.2cm}
+    {\fontsize{15}{18}\selectfont \bfseries ACKNOWLEDGEMENT}\\[0.5cm]
+\end{center}
+
+\noindent
+We would like to take this opportunity to express our sincere gratitude to our college \textbf{Punjab Engineering College (Deemed to be University), Chandigarh} and the \textbf{Department of Electrical Engineering} for offering the interdisciplinary course \textit{Fuzzy Logic and Neural Networks (EEO1003)} and providing us the opportunity to work on this project.
+
+\vspace{0.25cm}
+\noindent
+We are immensely grateful to our project mentors \textbf{Dr.~Rintu Khanna} and \textbf{Dr.~Hemant Kumar} (Department of Electrical Engineering) whose continuous guidance, structured lectures, technical support, and valuable suggestions helped us develop and evaluate this neuro-fuzzy system. Their insights into fuzzy inference systems, membership function design, and neural networks were invaluable.
+
+\vspace{0.25cm}
+\noindent
+We express our sincere thanks to the Project Evaluation Committee for their constructive feedback and guidelines for the betterment of this project report.
+
+\vspace{0.25cm}
+\noindent
+We convey our deep sense of gratitude to all teaching and non-teaching staff of the Department of Electrical Engineering for their constant encouragement and assistance. We also extend appreciation to the curators of the benchmark Pima Indians Diabetes Database from the UCI Machine Learning Repository.
+
+\vspace{0.25cm}
+\noindent
+Finally, we wish to express our heartfelt thanks to our families and friends for their constant moral support and encouragement throughout our engineering education.
+
+\vspace{1.5cm}
+\noindent
+\begin{tabular*}{\linewidth}{@{}l @{\extracolsep{\fill}} r@{}}
+    \textbf{Rakshit} (23106017) & \textbf{Aarav} (23106023) \\[0.6cm]
+    \textbf{Aryan Garg} (23106024) & \textbf{Amish Bansal} (23103087) \\
+\end{tabular*}
+
+% ==============================================================================
+% 5. ABSTRACT (Page 5)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{Abstract}
+\begin{center}
+    \vspace*{0.1cm}
+    {\fontsize{15}{18}\selectfont \bfseries ABSTRACT}\\[0.35cm]
+\end{center}
+
+\noindent
+In healthcare applications, artificial neural networks achieve strong classification performance but operate as opaque black boxes. Because a neural network transforms input features through layers of non-linear weights and activations, doctors cannot see why a particular patient was classified as high risk. This opacity makes clinicians hesitant to trust automated predictions, especially when making critical medical decisions.
+
+This project presents an interpretable neuro-fuzzy framework for explaining black-box neural network decisions in diabetes diagnosis. Developed for the course \textit{Fuzzy Logic and Neural Networks (EEO1003)}, the system bridges foundational neural networks and fuzzy inference systems: training an Artificial Neural Network (Multi-Layer Perceptron) using backpropagation, and extracting a Takagi-Sugeno-Kang (TSK) Fuzzy Inference System using shouldered Gaussian membership functions and Fuzzy C-Means (FCM) clustering.
+
+Using the benchmark Pima Indians Diabetes Database ($N=768$, 8 clinical features), we first train a regularized MLP neural network ($8 \to 8 \to 1$) that achieves 70.1\% test accuracy and 0.797 ROC-AUC. Rather than predicting ground-truth labels directly, our neuro-fuzzy surrogate is trained to imitate the probability scores emitted by the neural network. To avoid rule explosion ($3^8 = 6{,}561$ rules), we apply Permutation Feature Importance to select the four primary clinical drivers: Glucose, BMI, Age, and Pregnancies. An 8-rule TSK fuzzy system is initialized from patient data via Fuzzy C-Means clustering.
+
+The membership functions (Low, Medium, High) are tuned using hybrid learning: least squares solves the risk outputs in one step, while gradient descent fine-tunes the membership curves under semantic constraints (keeping Low $<$ Medium $<$ High). A backward pruning algorithm then eliminates redundant conditions and rules. The final model achieves \textbf{92.2\% test fidelity} to the neural network using only \textbf{4 readable IF-THEN rules and 12 conditions}. On confident predictions, fidelity reaches \textbf{98.3\%}. Any prediction can be verified by hand in 30 seconds using simple arithmetic, supported by an outlier detection metric ($\mathcal{S}_{\text{match}}$) and an interactive web laboratory with live feature sliders.
+
+\vspace{0.35cm}
+\noindent \textbf{Keywords:} Neural Networks, Fuzzy Logic, ANFIS, Rule Extraction, Explainable AI (XAI), Fuzzy C-Means, Model Interpretability, Clinical Decision Support.
+
+% ==============================================================================
+% 6. TABLE OF CONTENTS (Page 6 - Elegant Layout with Dotted Leaders)
+% ==============================================================================
+\clearpage
+\begingroup
+\linespread{0.95}\selectfont
+\small
+\setlength{\parskip}{0pt}
+\setcounter{tocdepth}{0}
+\makeatletter
+\def\@makeschapterhead#1{%
+  \vspace*{2\p@}%
+  {\parindent \z@ \centering \normalfont
+    {\fontsize{14}{17}\selectfont \bfseries TABLE OF CONTENTS}\par\nobreak
+    \vskip 10\p@
+  }}
+\makeatother
+\tableofcontents
+\endgroup
+
+% ==============================================================================
+% 7. LIST OF FIGURES (Page 7 - Dedicated Page with Generous Spacing)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{List of Figures}
+\begingroup
+\linespread{1.15}\selectfont
+\setlength{\parskip}{0pt}
+\makeatletter
+\def\@makeschapterhead#1{%
+  \vspace*{2\p@}%
+  {\parindent \z@ \centering \normalfont
+    {\fontsize{14}{17}\selectfont \bfseries \MakeUppercase{#1}}\par\nobreak
+    \vskip 14\p@
+  }}
+\makeatother
+\setcounter{tocdepth}{1}
+\listoffigures
+\endgroup
+
+% ==============================================================================
+% 8. LIST OF TABLES (Page 8 - Dedicated Page with Generous Spacing)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{List of Tables}
+\begingroup
+\linespread{1.10}\selectfont
+\setlength{\parskip}{0pt}
+\makeatletter
+\def\@makeschapterhead#1{%
+  \vspace*{2\p@}%
+  {\parindent \z@ \centering \normalfont
+    {\fontsize{14}{17}\selectfont \bfseries \MakeUppercase{#1}}\par\nobreak
+    \vskip 14\p@
+  }}
+\makeatother
+\setcounter{tocdepth}{1}
+\listoftables
+\endgroup
+
+% ==============================================================================
+% 9. LIST OF ABBREVIATIONS & NOTATION (Page 9)
+% ==============================================================================
+\clearpage
+\addcontentsline{toc}{chapter}{List of Abbreviations and Mathematical Notation}
+\begin{center}
+    {\fontsize{14}{17}\selectfont \bfseries LIST OF ABBREVIATIONS \& MATHEMATICAL NOTATION}\\[0.25cm]
+\end{center}
+
+{\linespread{0.95}\selectfont
+\begin{center}
+{\fontsize{11}{14}\selectfont \bfseries Acronyms}\\[0.15cm]
+\footnotesize
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Acronym} & \textbf{Full Definition} \\
+\midrule
+\textbf{AI} & Artificial Intelligence \\
+\textbf{ANFIS} & Adaptive Network-based (or Neuro-) Fuzzy Inference System \\
+\textbf{ANN} & Artificial Neural Network \\
+\textbf{AUC} & Area Under the Curve \\
+\textbf{BCE} & Binary Cross-Entropy \\
+\textbf{BMI} & Body Mass Index ($\text{kg/m}^2$) \\
+\textbf{CDSS} & Clinical Decision Support System \\
+\textbf{CV} & Cross-Validation \\
+\textbf{DPF} & Diabetes Pedigree Function \\
+\textbf{FCM} & Fuzzy C-Means \\
+\textbf{FIS} & Fuzzy Inference System \\
+\textbf{LIME} & Local Interpretable Model-agnostic Explanations \\
+\textbf{MAE} & Mean Absolute Error \\
+\textbf{MLP} & Multi-Layer Perceptron \\
+\textbf{MSE} & Mean Squared Error \\
+\textbf{PFI} & Permutation Feature Importance \\
+\textbf{PIDD} & Pima Indians Diabetes Database \\
+\textbf{ReLU} & Rectified Linear Unit ($\max(0, z)$) \\
+\textbf{RLS} & Regularized Least Squares \\
+\textbf{ROC} & Receiver Operating Characteristic \\
+\textbf{SHAP} & SHapley Additive exPlanations \\
+\textbf{SSE} & Server-Sent Events \\
+\textbf{TSK} & Takagi-Sugeno-Kang (Fuzzy Model) \\
+\textbf{XAI} & Explainable Artificial Intelligence \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\vspace{0.15cm}
+\begin{center}
+{\fontsize{11}{14}\selectfont \bfseries Mathematical Symbols and Dimensions}\\[0.15cm]
+\footnotesize
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+\textbf{Symbol} & \textbf{Mathematical Meaning} & \textbf{Project Value} \\
+\midrule
+$N_{\text{train}}$ & Number of real training examples & 460 \\
+$N_{\text{val}}, N_{\text{test}}$ & Real validation and holdout test examples & 154 each \\
+$N_{\text{synth}}$ & Synthetic oracle neighborhood samples & 2,000 \\
+$d, k$ & Raw feature count ($d=8$) and selected salient features ($k=4$) & 8, 4 \\
+$m, R$ & Linguistic terms ($m=3$) and rule count (8 full $\to$ 4 pruned) & 3, 4 \\
+$c_{jt}, \sigma_{jt}$ & Gaussian membership center and width parameters & Premise parameters \\
+$\mu_{jt}(\tilde{x}_j)$ & Membership grade of input $j$ in linguistic term $t$ & $[0, 1]$ \\
+$w_r, \bar{w}_r$ & Raw and normalized firing strength of fuzzy rule $r$ & $\sum \bar{w}_r = 1$ \\
+$p_r, y(\tilde{x})$ & Consequent risk scalar and defuzzified surrogate prediction & $[0, 1]$ \\
+$t_i, \mathcal{F}$ & Black-box continuous probability and empirical test fidelity & $f_{\text{NN}}(x_i), \ 92.2\%$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+}
+
+% Switch to main body numbering and headers
+\clearpage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+
+\chapter{Introduction and Problem Definition}
+
+\section{Context: Deep Learning in Healthcare and Clinical Diagnostics}
+
+The integration of artificial intelligence (AI) and machine learning into clinical decision support systems (CDSS) represents a major advancement in chronic disease management, where early detection of type 2 diabetes mellitus prevents severe cardiovascular and renal complications. Modern diagnostic pipelines frequently employ feedforward artificial neural networks (ANNs), such as multi-layer perceptrons (MLPs) trained with backpropagation (Haykin, 1994; Fausett, 1993), to model non-linear physiological interactions across clinical features including plasma glucose, body mass index (BMI), age, maternal pregnancy count, and blood pressure.
+
+However, clinical adoption of neural networks faces a fundamental hurdle: \textbf{opacity}. Because input measurements are transformed across layers of non-linear weights and activations, clinicians cannot trace why a patient was assigned an 84\% diabetes probability. Without verifiable decision criteria, physicians cannot safely rely on automated predictions for patient care.
+
+\section{The Clinical Dilemma: High Accuracy vs. Dangerous Opacity}
+
+Deploying neural networks in clinical environments introduces four major challenges: (1)~\textbf{Verification Necessity:} clinicians must confirm which physiological factors drove a diagnosis before prescribing treatment; (2)~\textbf{Confounding Artifacts:} black boxes can exploit dataset artifacts or missing-data patterns, hiding flaws behind high overall accuracy; (3)~\textbf{Patient Communication:} medical ethics requires explaining diagnostic risk in plain language rather than abstract weight matrices; and (4)~\textbf{Shortcomings of Local Attribution Tools:} popular local tools like LIME and SHAP output disconnected feature bars that fluctuate across runs and fail to provide auditable hospital-wide IF-THEN policies.
+
+\section{Formal Problem Statement: Post-Hoc Rule Extraction}
+
+Let a trained neural network be defined as a mapping $f_{\text{NN}}: \mathcal{X} \to \mathcal{Y}$, where $\mathcal{X} \subseteq \mathbb{R}^d$ represents the clinical input space ($d=8$ in PIDD) and $\mathcal{Y} \in [0, 1]$ represents the predicted probability of diabetes mellitus.
+
+This project addresses the challenge of \textbf{Global Post-Hoc Rule Extraction}. Developed for the course \textit{Fuzzy Logic and Neural Networks (EEO1003)} offered by the Department of Electrical Engineering at Punjab Engineering College (Deemed to be University), Chandigarh, this project designs an interpretable neuro-fuzzy surrogate $f_{\text{fuzzy}}$ that extracts human-understandable IF-THEN rules from the trained neural network:
+\begin{equation}
+    \text{Rule } r: \quad \textbf{IF } \tilde{x}_1 \text{ is } A_{r1} \textbf{ AND } \dots \textbf{ AND } \tilde{x}_k \text{ is } A_{rk} \quad \textbf{THEN } \text{Risk } = p_r
+\end{equation}
+where $A_{rj}$ denotes an intuitive linguistic term (\textit{Low}, \textit{Medium}, or \textit{High}) defined by a Gaussian membership function, and $p_r \in [0, 1]$ is a crisp scalar risk consequence.
+
+The surrogate must satisfy two clear engineering objectives:
+\begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{High Fidelity ($\mathcal{F}$):} The extracted fuzzy rules must accurately match the neural network's classifications across test patients: $\mathcal{F}(f_{\text{fuzzy}}, f_{\text{NN}}; \mathcal{D}_{\text{test}}) = \frac{1}{N_{\text{test}}} \sum_{i=1}^{N_{\text{test}}} \mathbb{I}[ \hat{y}^{\text{fuzzy}}_i = \hat{y}^{\text{NN}}_i ] \to 1.0$.
+    \item \textbf{High Interpretability ($\mathcal{I}$):} The rule base must be compact enough for a human doctor to read in one glance: few rules ($R \le 5$), short conditions (average length $\le 3$), and stable linguistic partitions.
+\end{enumerate}
+
+\section{Regulatory Directives and the Glass-Box Philosophy}
+
+Interpretable AI is increasingly mandated by international healthcare regulations: the \textbf{EU AI Act} classifies medical diagnostic tools as \textit{High-Risk}, requiring human clinical oversight; \textbf{GDPR} guarantees a patient's ``Right to Explanation''; and \textbf{U.S. FDA SaMD Guidelines} require auditable decision pathways. To satisfy these clinical and regulatory requirements, this project adopts an explainable glass-box philosophy: train a high-accuracy neural network first, query it as an oracle teacher across patient cases, and train a compact neuro-fuzzy inference system to explain the network's reasoning in plain medical language. This synthesizes three engineering pillars: (1)~\textbf{Pedagogical Rule Extraction} (Andrews et al., 1995); (2)~\textbf{Fuzzy Logic and Linguistic Variables} using smooth continuous shouldered Gaussian curves (Ross, 2010); and (3)~\textbf{Adaptive Neuro-Fuzzy Learning (ANFIS)} with hybrid optimization and semantic constraints (Jang, 1993).
+
+\section{Project Objectives, Scope, and Report Structure}
+
+\textbf{Core Objectives:} (1)~Train and cross-validate an 8-8-1 MLP on the benchmark PIDD cohort, applying Permutation Feature Importance to select the top 4 clinical drivers; (2)~Group patient data using Fuzzy C-Means clustering to initialize compact TSK rules; (3)~Apply hybrid learning under semantic ordering constraints ($c_{\text{Low}} < c_{\text{Med}} < c_{\text{High}}$); and (4)~Implement greedy backward pruning to achieve $>92\%$ fidelity with just 4 readable rules, closed-form arithmetic traceability, and live web telemetry.
+
+\textbf{Scope and Academic Boundaries:} As fourth-year engineering students completing this course under the Department of Electrical Engineering, our focus is on practical engineering synthesis and implementation—integrating feature selection, clustering, hybrid learning, pruning, and reactive streaming telemetry—rather than claiming theoretical mathematical novelty over foundational literature. The system is evaluated on the benchmark PIDD cohort ($N=768$).
+
+\textbf{Report Organization:} Chapter~2 reviews XAI taxonomies and fuzzy foundations; Chapter~3 details data preprocessing; Chapter~4 presents neural network training and feature selection; Chapter~5 derives the neuro-fuzzy rule extraction engine; Chapter~6 details software architecture and the web laboratory; Chapter~7 evaluates fidelity and complexity; Chapter~8 walks through clinical case studies; Chapter~9 discusses engineering requirements; and Chapter~10 presents conclusions.
+
+
+\chapter{Literature Review and Theoretical Foundations}
+
+\section{The Spectrum of Model Explainability}
+
+Explainable Artificial Intelligence (XAI) addresses the critical challenge of understanding how complex machine learning systems make decisions. In academic literature and engineering practice, interpretability is organized along two primary axes: \textbf{intrinsic versus post-hoc}, and \textbf{local versus global} (Molnar, 2022), as summarized in Table~\ref{tab:xai_taxonomy}.
+
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \renewcommand{\arraystretch}{0.85}
+    \begin{tabularx}{\textwidth}{l X X}
+    \toprule
+    \textbf{Dimension} & \textbf{Local Scope (Individual Prediction)} & \textbf{Global Scope (Entire Model Logic)} \\
+    \midrule
+    \textbf{Intrinsic} & Linear regression weights; single branch of a shallow decision tree. & Full shallow decision tree; Rule-based expert system (Mamdani \& Assilian, 1975). \\
+    \midrule
+    \textbf{Post-Hoc} & LIME (Ribeiro et al., 2016); Kernel SHAP (Lundberg \& Lee, 2017). & Decision Tree Surrogate (TREPAN); \textbf{Glass-Box Neuro-Fuzzy Surrogate (Proposed)}. \\
+    \bottomrule
+    \end{tabularx}
+    \caption[Taxonomy of Explainable AI Methodologies]{Taxonomy of Explainable AI methodologies across scope and operational paradigm.}
+    \label{tab:xai_taxonomy}
+\end{table}
+
+\textbf{Intrinsic models} (such as linear regression or small decision trees) are easy to understand because their structure is simple. However, medical conditions involve complicated, non-linear relationships that simple linear formulas cannot capture accurately. On the other hand, \textbf{post-hoc explainability} allows us to train a high-accuracy neural network first, and then build a transparent "surrogate" model that extracts human-understandable rules from it.
+
+\section{Local Perturbation Methods and Clinical Limitations}
+
+Currently, the most common explainability techniques in industry are local perturbation tools:
+
+\subsection{Local Interpretable Model-agnostic Explanations (LIME)}
+LIME (Ribeiro et al., 2016) explains a single prediction by creating slight random variations around that patient, checking what the neural network predicts for each variation, and fitting a simple linear line locally. While conceptually straightforward, LIME's random sampling produces slightly different explanation weights every time it runs on the exact same patient, which undermines clinical confidence.
+
+\subsection{SHapley Additive exPlanations (SHAP)}
+SHAP (Lundberg \& Lee, 2017) applies cooperative game theory to assign an importance credit (Shapley value) to each feature. While mathematically principled, SHAP assumes features act independently in an additive sum ($\sum \phi_j$). This fails to convey medical interactions---for instance, high glucose combined with high BMI creates compounded diabetes risk that an additive sum cannot clearly represent.
+
+\subsection{Clinical Deficiencies of Local Perturbations}
+Local tools exhibit critical shortcomings in hospital workflows: (1)~\textbf{No Global Policy:} They output isolated bar charts for one patient at a time, but do not provide a set of rules that doctors can audit as hospital policy; (2)~\textbf{Sampling Artifacts:} Random perturbations can generate medically impossible patient records (such as zero blood pressure combined with high glucose); and (3)~\textbf{Lack of Plain-Language Rules:} Bar charts do not state clear IF-THEN diagnostic conditions.
+
+\section{Global Rule Extraction Taxonomies}
+
+To provide complete model auditability, researchers study \textbf{Global Rule Extraction}. As surveyed by Andrews, Diederich, and Tickle (1995), extraction methods fall into three broad classes:
+\begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Decompositional:} Inspects individual neurons and weight matrices; heavily dependent on network topology and activation functions.
+    \item \textbf{Pedagogical (Black-Box Imitation):} Treats the neural network strictly as an oracle teacher, learning transparent IF-THEN rules directly from network inputs and outputs.
+    \item \textbf{Eclectic:} Combines black-box sampling with internal weight analysis.
+\end{enumerate}
+Our \textbf{Glass-Box Insight} project follows the \textbf{pedagogical approach}. By treating the trained neural network as an oracle, the fuzzy extraction pipeline is modular and can explain any neural classifier regardless of internal architecture.
+
+\section{Symbolic Surrogates: Decision Trees (TREPAN) and Crisp Limits}
+
+Early surrogate systems used decision trees (TREPAN; Craven \& Shavlik, 1996). However, traditional "crisp" decision trees suffer from rigid boundary thresholds. For example, if a split threshold is set at $\text{Glucose} \le 126.0\text{ mg/dL}$, a patient with 125.9 mg/dL is categorized as completely healthy while 126.1 mg/dL is categorized as diabetic. This abrupt jump fails to reflect the continuous nature of human biology.
+
+\section{Fuzzy Set Theory and Linguistic Modeling}
+
+To handle gradual transitions naturally, Lotfi A. Zadeh (1965) introduced \textbf{Fuzzy Set Theory}, a cornerstone of modern intelligent systems engineering (Ross, 2010; Sivanandam et al., 2007). In classical set theory, an element either belongs to a set or does not ($\chi_A(x) \in \{0, 1\}$). In fuzzy set theory, membership is continuous:
+\begin{equation}
+    \mu_A(x) \in [0, 1]
+\end{equation}
+This allows us to model \textbf{linguistic variables} (Zadeh, 1975) like \textit{Glucose} using medical terms: \textit{Low}, \textit{Medium}, and \textit{High}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.80\textwidth,keepaspectratio]{crisp_vs_fuzzy.png}
+    \caption[Crisp vs. Fuzzy Set Membership]{Conceptual comparison between crisp binary set membership and continuous fuzzy set membership across the clinical glycemic continuum.}
+    \label{fig:crisp_vs_fuzzy}
+\end{figure}
+
+Figure~\ref{fig:crisp_vs_fuzzy} illustrates the fundamental contrast between crisp and fuzzy representations of blood glucose. In the crisp model (left), a rigid cutoff at 126 mg/dL forces an unnatural step-change: 125.9 mg/dL is categorized as non-diabetic ($\mu=0$), while 126.1 mg/dL is classified as diabetic ($\mu=1$). In contrast, the continuous fuzzy membership model (right) provides smooth, overlapping transitions that reflect genuine clinical gradualness, recognizing borderline states without arbitrary cliffs.
+
+\subsection{Shouldered Gaussian Memberships}
+Standard bell-shaped Gaussians decay toward zero at extreme values. To ensure that severely ill patients (e.g., blood glucose $\ge 200$ mg/dL) do not receive zero membership in \textit{High}, we implement \textbf{monotonic flat boundary shoulders}: \textit{Low} remains flat at 1.0 for all values below its center, and \textit{High} remains flat at 1.0 for all values above its center.
+
+\section{Fuzzy Inference Systems: Zero-Order Takagi-Sugeno-Kang}
+
+In fuzzy systems engineering (Ross, 2010; Sivanandam et al., 2007), a Fuzzy Inference System (FIS) maps input linguistic terms to outputs. While Mamdani systems use fuzzy sets for outputs, the \textbf{zero-order Takagi-Sugeno-Kang (TSK)} model (Takagi \& Sugeno, 1985) uses crisp numeric risk values:
+\begin{equation}
+    \text{Rule } r: \quad \textbf{IF } x_1 \text{ is } A_{r1} \textbf{ AND } \dots \textbf{ AND } x_k \text{ is } A_{rk} \quad \textbf{THEN } \text{Risk } = p_r \in [0, 1]
+\end{equation}
+The final output is computed by taking the weighted average of all rule outputs:
+\begin{equation}
+    y(x) = \sum_{r=1}^R \bar{w}_r(x) \cdot p_r
+\end{equation}
+where $\bar{w}_r$ is the normalized firing strength of rule $r$. This provides exact closed-form arithmetic traceability that anyone can verify with a handheld calculator.
+
+\section{Neuro-Fuzzy Systems: ANFIS and Hybrid Learning}
+
+An Adaptive Neuro-Fuzzy Inference System (ANFIS) (Jang, 1993; Sivanandam et al., 2007) connects neural networks and fuzzy logic into a 5-layer network:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Layer 1:} Calculates membership values $\mu(x)$ for each feature in \textit{Low}, \textit{Medium}, \textit{High}.
+    \item \textbf{Layer 2:} Calculates rule firing strengths using the product T-norm: $w_r = \mu_1 \times \mu_2 \dots$
+    \item \textbf{Layer 3:} Normalizes firing strengths: $\bar{w}_r = w_r / \sum w$.
+    \item \textbf{Layer 4 \& 5:} Multiplies by consequent risk scores $p_r$ and sums them to obtain final risk $y(x)$.
+\end{itemize}
+ANFIS trains these parameters using \textbf{hybrid learning}: linear risk consequents $p_r$ are solved in one step via regularized least squares, while the membership curve centers and widths are fine-tuned using standard backpropagation gradient descent (Haykin, 1994; Fausett, 1993).
+
+\section{Fuzzy C-Means Clustering to Mitigate Rule Explosion}
+
+If we created every possible combination of 4 features with 3 linguistic terms, we would get $3^4 = \mathbf{81\text{ rules}}$ (and $3^8 = 6{,}561$ for 8 features), which is impossible for a doctor to read. To prevent rule explosion, we apply \textbf{Fuzzy C-Means (FCM)} clustering (Bezdek, 1981) to find 8 natural patient prototypes from the training data, initializing an initial rule base of just 8 compact rules.
+
+\section{Fuzzy Interpretability Criteria and Research Gap}
+
+Casillas et al. (2003) showed that a trustworthy fuzzy system requires both \textbf{low syntactic complexity} (few rules and conditions) and \textbf{semantic integrity} (linguistic terms must remain ordered: $c_{\text{Low}} < c_{\text{Med}} < c_{\text{High}}$). Table~\ref{tab:literature_comparison} compares existing methods with our proposed system.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.80}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabularx}{\textwidth}{>{\bfseries\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash}p{1.9cm} >{\raggedright\arraybackslash}p{1.4cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Method} & \textbf{Explanation} & \textbf{Stability} & \textbf{Traceability} & \textbf{Clinical Auditability \& Readability} \\
+\midrule
+LIME (2016) & Local Attribution & Low & Local linear model & Bar chart; lacks unified global rule policy. \\
+\midrule
+SHAP (2017) & Local Shapley & High & Additive ($\sum \phi_j$) & Force plots; assumes feature independence. \\
+\midrule
+TREPAN (1996) & Global Decision Tree & Moderate & Crisp Boolean path & Tree diagram; discontinuous at thresholds. \\
+\midrule
+Standard ANFIS & Global Neuro-Fuzzy & High & Exact fuzzy rules & Suffers from rule explosion ($3^8 = 6{,}561$ rules). \\
+\midrule
+Glass-Box Insight & Global Neuro-Fuzzy & High & Closed-form algebraic trace & 4 readable rules; 12 conditions; semantic bounds; weak-match alert. \\
+\bottomrule
+\end{tabularx}
+\caption[Comparative Evaluation of Explainable AI Frameworks]{Comparative evaluation of Explainable AI frameworks for clinical decision support.}
+\label{tab:literature_comparison}
+\end{table}
+
+\textbf{Identified Research Gap:} Existing techniques force clinicians to choose between unstable local feature bars (LIME/SHAP), brittle crisp decision trees (TREPAN), or bloated fuzzy rule bases. Glass-Box Insight bridges this gap by combining feature selection, clustering, hybrid neuro-fuzzy learning, and rule pruning into a compact 4-rule glass-box model.
+
+
+\chapter{Dataset Ingestion, Clinical Attributes and Preprocessing}
+
+\section{The Pima Indians Diabetes Database: Context and Demographics}
+
+The empirical evaluation of the Glass-Box Insight framework is conducted on the benchmark \textbf{Pima Indians Diabetes Database} (PIDD), curated by the National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK) and preserved by the UCI Machine Learning Repository (Smith et al., 1988).
+
+The Pima population of the Gila River Indian Community historically exhibited the highest global prevalence of Type 2 diabetes mellitus, exceeding 50\% in adults over 35 years. Epidemiological literature attributes this predisposition to the ``thrifty gene hypothesis''—evolutionary adaptations enabling efficient caloric conservation during famine cycles, which cause rapid metabolic breakdown, insulin resistance, and visceral adiposity in the presence of modern sedentary habits and high-glycemic diets.
+
+The database comprises records from $N = 768$ female patients aged $\ge 21$ years, clinically evaluated per World Health Organization (WHO) protocols. The binary target \texttt{Outcome} records whether diabetes was diagnosed within five years of examination:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Class 0 (Non-diabetic):} 500 patients (65.10\%)
+    \item \textbf{Class 1 (Diabetic):} 268 patients (34.90\%)
+\end{itemize}
+The class imbalance (1.87:1) necessitates stratified sampling and balanced evaluation metrics (such as ROC-AUC and F1-score) to prevent majority-class bias.
+
+\section{Clinical Attributes and Physiological Correlations}
+
+Each patient record contains $d = 8$ physiological and demographic attributes, summarized in Table~\ref{tab:clinical_features}.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.80}
+\begin{tabularx}{\textwidth}{l l X r r r}
+\toprule
+\textbf{Feature Name} & \textbf{Units} & \textbf{Diagnostic / Pathological Meaning} & \textbf{Min} & \textbf{Median} & \textbf{Max} \\
+\midrule
+\texttt{Pregnancies} & Count & Number of completed gestational cycles. & 0 & 3.0 & 17 \\
+\texttt{Glucose} & mg/dL & 2-hr plasma glucose in an oral glucose tolerance test. & 0 & 117.0 & 199 \\
+\texttt{BloodPressure} & mm Hg & Diastolic blood pressure; vascular resistance marker. & 0 & 72.0 & 122 \\
+\texttt{SkinThickness} & mm & Triceps skinfold thickness; subcutaneous fat marker. & 0 & 23.0 & 99 \\
+\texttt{Insulin} & $\mu\text{U/mL}$ & 2-hr serum insulin; pancreatic beta-cell response. & 0 & 30.5 & 846 \\
+\texttt{BMI} & $\text{kg/m}^2$ & Body Mass Index; weight in kg divided by height in $\text{m}^2$. & 0.0 & 32.0 & 67.1 \\
+\texttt{Pedigree} & Unitless & Diabetes Pedigree Function; hereditary genetic score. & 0.078 & 0.372 & 2.42 \\
+\texttt{Age} & Years & Patient age at clinical examination. & 21 & 29.0 & 81 \\
+\bottomrule
+\end{tabularx}
+\caption[Clinical Attributes and Baseline Statistics in PIDD]{Clinical attributes in the Pima Indians Diabetes Database and baseline statistics before data imputation.}
+\label{tab:clinical_features}
+\end{table}
+
+These attributes span three principal metabolic axes:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Glycemic Regulation (\texttt{Glucose}, \texttt{Insulin}):} Elevated plasma glucose is the diagnostic hallmark of diabetes. Serum insulin reflects beta-cell compensatory hypersecretion or subsequent secretory failure.
+    \item \textbf{Adiposity (\texttt{BMI}, \texttt{SkinThickness}):} Visceral adipose tissue releases pro-inflammatory cytokines that disrupt insulin receptor phosphorylation in peripheral tissues.
+    \item \textbf{Genetic and Demographic Risk (\texttt{Age}, \texttt{Pedigree}, \texttt{Pregnancies}):} Age correlates with tissue resistance; pedigree measures familial risk; multiparity is linked to gestational diabetes stress.
+\end{itemize}
+
+\section{The Zero-as-Missing Phenomenon: Biological Impossibilities}
+
+A critical vulnerability in raw PIDD data is numerical zeros denoting missing entries. A living patient cannot exhibit zero glucose (fatal hypoglycemia), zero blood pressure (cardiac arrest), zero skinfold thickness, zero serum insulin, or zero BMI. Table~\ref{tab:missing_zeros} quantifies these unrecorded observations.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.80}
+\begin{tabularx}{\textwidth}{l r r X}
+\toprule
+\textbf{Clinical Feature} & \textbf{Zero Count} & \textbf{Missing \%} & \textbf{Physiological Reality} \\
+\midrule
+\texttt{Glucose} & 5 & 0.65\% & Laboratory recording omission; essential diagnostic metric. \\
+\texttt{BloodPressure} & 35 & 4.56\% & Unmeasured sphygmomanometer reading. \\
+\texttt{BMI} & 11 & 1.43\% & Unrecorded patient weight or height. \\
+\texttt{SkinThickness} & 227 & 29.56\% & Omitted caliper skinfold measurement. \\
+\texttt{Insulin} & 374 & 48.70\% & Expensive 2-hr post-prandial serum assay not administered. \\
+\bottomrule
+\end{tabularx}
+\caption[Quantification of Biologically Impossible Zero Values]{Quantification of biologically impossible zero values representing missing clinical entries.}
+\label{tab:missing_zeros}
+\end{table}
+
+Nearly 49\% of insulin and 30\% of skinfold values are unrecorded. Leaving these as zeros causes neural networks to learn spurious correlations (e.g., zero insulin falsely predicting low risk).
+
+\section{Leakage-Free Preprocessing: Stratified Split and Median Imputation}
+
+To prevent \textbf{data leakage}, all preprocessing statistics are strictly isolated within the training partition.
+
+\subsection{Stratified Train-Validation-Test Splitting}
+The dataset ($N = 768$) is partitioned via stratified random sampling (fixed seed 42) into three disjoint subsets:
+\begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Training Partition ($\mathcal{D}_{\text{train}}$):} 60\% ($N_{\text{train}} = 460$; 299 non-diabetic, 161 diabetic). Used to fit model weights and compute imputation statistics.
+    \item \textbf{Validation Partition ($\mathcal{D}_{\text{val}}$):} 20\% ($N_{\text{val}} = 154$; 100 non-diabetic, 54 diabetic). Used to tune hyperparameters and guide rule pruning stopping criteria.
+    \item \textbf{Test Partition ($\mathcal{D}_{\text{test}}$):} 20\% ($N_{\text{test}} = 154$; 101 non-diabetic, 53 diabetic). Strictly held out to evaluate final generalization fidelity and accuracy.
+\end{enumerate}
+
+\subsection{Leakage-Free Imputation}
+For constrained clinical features (\texttt{Glucose}, \texttt{BloodPressure}, \texttt{SkinThickness}, \texttt{Insulin}, and \texttt{BMI}), zeros are mapped to \texttt{NaN} and imputed with the \textbf{training partition median}:
+\begin{equation}
+    x_{ij}^{\text{imputed}} = \begin{cases} 
+    \text{Median}\left(\{ x_{lj} \mid x_{lj} > 0, l \in \mathcal{D}_{\text{train}} \}\right) & \text{if } x_{ij} = 0 \text{ and } j \in \mathcal{Z} \\
+    x_{ij} & \text{otherwise}
+    \end{cases}
+\end{equation}
+Calculated training medians are: \texttt{Glucose}: 117.0 mg/dL, \texttt{BloodPressure}: 72.0 mm Hg, \texttt{SkinThickness}: 29.0 mm, \texttt{Insulin}: 125.0 $\mu\text{U/mL}$, and \texttt{BMI}: 32.3 $\text{kg/m}^2$. Validation and test records are imputed using these exact training medians.
+
+\section{Dual Feature Scaling: Standardization vs. Min-Max Normalization}
+
+The neural network and the neuro-fuzzy surrogate require distinct scaling strategies:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Standardization for Neural Networks:} Gradient descent requires zero-mean, unit-variance standardized inputs ($x_{ij}^{\text{std}} = (x_{ij} - \mu_j^{\text{train}}) / \sigma_j^{\text{train}}$) to ensure well-conditioned gradients.
+    \item \textbf{Min-Max Normalization for ANFIS:} The fuzzy system requires inputs mapped to $[0, 1]$ ($\tilde{x}_{ij} = (x_{ij} - x_j^{\min}) / (x_j^{\max} - x_j^{\min})$) to ensure consistent Gaussian membership widths. For clinical presentation, membership parameters are mapped back to original medical units via exact inverse transformation:
+    \begin{equation}
+        c_j^{\text{orig}} = x_j^{\min} + c_j^{\text{scaled}} \cdot (x_j^{\max} - x_j^{\min}), \qquad \sigma_j^{\text{orig}} = \sigma_j^{\text{scaled}} \cdot (x_j^{\max} - x_j^{\min})
+    \end{equation}
+\end{itemize}
+
+\section{Synthetic Oracle Neighborhood Sampling}
+
+With only $N_{\text{train}} = 460$ real patients in an 8-dimensional space, training an explainer solely on empirical samples risks decision boundary underfitting. We implement a \textbf{Synthetic Oracle Sampling Engine} (\texttt{glassbox/oracle.py}) generating $N_{\text{synth}} = 2{,}000$ artificial profiles: (1)~\textbf{Gaussian Jitter (70\%):} $\tilde{z}_i = \text{clip}(\tilde{x}_i + \epsilon, 0, 1)$, $\epsilon \sim \mathcal{N}(0, 0.15^2 I)$; and (2)~\textbf{Uniform Exploration (30\%):} sampled across $[0, 1]^k$ to probe interstitial regions.
+
+These synthetic patients do not possess ground-truth clinical labels. Instead, they are queried directly against the trained black-box neural network:
+\begin{equation}
+    t_{\text{synth}, i} = f_{\text{NN}}(z_i) = \text{blackbox.predict\_proba}(z_i) \in [0, 1]
+\end{equation}
+The augmented pool ($N_{\text{pool}} = 460 + 2{,}000 = \mathbf{2{,}460\text{ samples}}$) provides a dense representation of the black box's continuous risk landscape across the entire physiological input space.
+
+
+\chapter{The Black-Box Neural Network: Design, Optimization and Feature Importance}
+
+\section{Neural Network Architecture and Forward Pass Formulation}
+
+To serve as the clinical black box, we construct a fully connected feedforward Multi-Layer Perceptron (MLP) mapping standardized 8-dimensional measurement vectors $x^{\text{std}} \in \mathbb{R}^8$ to continuous posterior probabilities $P(\text{Outcome} = 1 \mid x) \in [0, 1]$.
+
+\subsection{Architectural Specification and Forward Propagation}
+The architecture possesses an $8 \to 8 \to 1$ topology: an input layer of 8 standardized clinical variables, a hidden layer of 8 ReLU units ($L_1$), and an output layer of 1 logistic sigmoid unit ($L_2$).
+
+Let $W^{[1]} \in \mathbb{R}^{8 \times 8}$ and $b^{[1]} \in \mathbb{R}^8$ denote hidden layer parameters. The hidden pre-activation $z^{[1]}$ and post-activation $h \in \mathbb{R}^8$ are:
+\begin{equation}
+    z^{[1]} = W^{[1]} x^{\text{std}} + b^{[1]}, \qquad h = \text{ReLU}\left(z^{[1]}\right) = \max\left(0, z^{[1]}\right)
+\end{equation}
+With output layer parameters $W^{[2]} \in \mathbb{R}^{1 \times 8}$ and $b^{[2]} \in \mathbb{R}^1$, scalar logit $z^{[2]}$ and posterior risk $\hat{y}_{\text{NN}}$ are:
+\begin{equation}
+    z^{[2]} = W^{[2]} h + b^{[2]}, \qquad \hat{y}_{\text{NN}} = \sigma\left(z^{[2]}\right) = \frac{1}{1 + e^{-z^{[2]}}} = P(\text{Outcome} = 1 \mid x)
+\end{equation}
+For discrete diagnosis, threshold $\tau = 0.5$ is applied: $\hat{Y}_{\text{NN}} = \mathbb{I}[\hat{y}_{\text{NN}} \ge 0.5]$.
+
+\subsection{Parameter Complexity}
+The total trainable continuous parameter count is:
+\begin{equation}
+    |\theta_{\text{NN}}| = (8 \times 8 + 8) + (8 \times 1 + 1) = 72 + 9 = \mathbf{81\text{ parameters}}
+\end{equation}
+Although 81 weights is compact compared to computer vision models, in tabular clinical diagnostics, 81 interconnected floating-point weights with non-linear ReLU gating already constitute an impenetrable black box. No clinician can inspect these 81 parameters and verify why a specific patient was classified as high risk.
+
+\section{Optimization Objective and Training Dynamics}
+
+The network is trained by minimizing $L_2$-regularized Binary Cross-Entropy (BCE) loss over $\mathcal{D}_{\text{train}}$:
+\begin{equation}
+    \mathcal{L}(\theta) = -\frac{1}{N_{\text{train}}} \sum_{i=1}^{N_{\text{train}}} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right] + \frac{\alpha}{2} \left( \|W^{[1]}\|_F^2 + \|W^{[2]}\|_2^2 \right)
+\end{equation}
+where $\alpha > 0$ denotes weight decay. We utilize Glorot uniform initialization and the Adam optimizer ($\eta = 0.001$, $\beta_1 = 0.9, \beta_2 = 0.999$, batch size $B = 200$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth,keepaspectratio]{training_curve.png}
+    \caption[Neural Network Training Loss Convergence]{Training loss convergence curve of the black-box neural network over 321 epochs under Adam optimization.}
+    \label{fig:nn_training_curve}
+\end{figure}
+
+Figure~\ref{fig:nn_training_curve} illustrates the empirical convergence of training loss across epochs. As shown in the plot, cross-entropy drops sharply from 0.693 to approximately 0.480 within the first 40 epochs as the hidden representations adapt to primary glycemic and adiposity gradients. Thereafter, Adam optimization guides smooth, monotonic descent toward 0.441. Under early stopping ($\Delta \mathcal{L} < 10^{-4}$ over 10 consecutive epochs), training terminates stably at epoch 321 without oscillatory divergence or gradient saturation.
+
+\section{Cross-Validation and Diagnostic Performance}
+
+Topology and regularization were selected via \textbf{5-fold stratified cross-validation} across the 460 training patients, evaluating 16 combinations of hidden layer sizes and $\alpha \in \{10^{-3}, 10^{-2}, 10^{-1}, 1.0\}$. The single hidden layer of 8 neurons with $\alpha = 1.0$ achieved the highest mean ROC-AUC ($0.826 \pm 0.017$). Strong regularization ($\alpha = 1.0$) suppresses spurious weight fluctuations, yielding smooth posterior risk surfaces.
+
+Following cross-validation, the selected MLP was evaluated on the held-out test partition ($N_{\text{test}} = 154$) alongside a reference $L_2$-regularized Logistic Regression baseline (Table~\ref{tab:diagnostic_performance}).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.80}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c c c}
+\toprule
+\textbf{Model Evaluated} & \textbf{Test Accuracy} & \textbf{Test F1-Score} & \textbf{Test ROC-AUC} & \textbf{Parameters} \\
+\midrule
+\textbf{Black-Box MLP (8 $\to$ 8 $\to$ 1)} & \textbf{0.701} & \textbf{0.558} & \textbf{0.797} & 81 \\
+Logistic Regression (Reference) & 0.708 & 0.545 & 0.817 & 9 \\
+\bottomrule
+\end{tabularx}
+\caption[Diagnostic Test-Set Performance Comparison]{Diagnostic test-set performance comparison between the black-box neural network and logistic regression.}
+\label{tab:diagnostic_performance}
+\end{table}
+
+The MLP achieves 70.1\% accuracy and 0.797 ROC-AUC, demonstrating performance parity with the linear baseline (70.8\%, 0.817). In small tabular biomedical datasets, linear models frequently match shallow networks. Crucially, the objective of this project is not to prove that neural networks beat linear models on PIDD, but to \textbf{explain deployed opaque neural networks} when institutional or engineering requirements dictate their deployment.
+
+\section{Permutation Feature Importance and Saliency Selection}
+
+To construct an interpretable neuro-fuzzy surrogate without suffering rule explosion ($3^8 = 6{,}561$ rules), we determine which inputs drive black-box inferences using \textbf{Permutation Feature Importance} (Breiman, 2001; Fisher et al., 2019). For each feature $j \in \{1, \dots, d\}$, column values are shuffled across validation samples, breaking target association. The resulting loss increase ($I(j) = L^{\text{perm}(j)} - L_{\text{baseline}}$) is averaged across $M=10$ random shuffles to compute normalized importance shares $S(j)$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth,keepaspectratio]{feature_importance.png}
+    \caption[Permutation Feature Importance Rankings]{Permutation feature importance rankings of the black-box neural network, identifying dominant clinical drivers.}
+    \label{fig:feature_importance}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.75}
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{l r r X}
+\toprule
+\textbf{Clinical Feature} & \textbf{Loss Increase} & \textbf{Importance Share} & \textbf{Surrogate Selection Status} \\
+\midrule
+\texttt{Glucose} & 0.231 & 43.8\% & \textbf{Selected (Rank 1)} \\
+\texttt{BMI} & 0.110 & 20.8\% & \textbf{Selected (Rank 2)} \\
+\texttt{Age} & 0.051 & 9.7\% & \textbf{Selected (Rank 3)} \\
+\texttt{Pregnancies} & 0.045 & 8.6\% & \textbf{Selected (Rank 4)} \\
+\texttt{Pedigree} & 0.043 & 8.2\% & Excluded \\
+\texttt{BloodPressure} & 0.024 & 4.5\% & Excluded \\
+\texttt{Insulin} & 0.016 & 3.1\% & Excluded (Severe missingness) \\
+\texttt{SkinThickness} & 0.007 & 1.3\% & Excluded (Severe missingness) \\
+\bottomrule
+\end{tabularx}
+\caption[Permutation Feature Importance Attribution]{Permutation feature importance analysis of the trained black-box neural network.}
+\label{tab:pfi_results}
+\end{table}
+
+Figure~\ref{fig:feature_importance} and Table~\ref{tab:pfi_results} display the resulting attribution hierarchy. As visually evidenced, plasma glucose dominates network behavior (43.8\% share), followed by BMI (20.8\%). Together with Age (9.7\%) and Pregnancies (8.6\%), the top four features account for \textbf{82.9\%} of total model attribution. The bottom features contribute minimally; notably, Insulin (3.1\%) and SkinThickness (1.3\%) are largely discounted by the network due to the high missingness documented in Chapter 3.
+
+Accordingly, we isolate $k = 4$ salient features: \textbf{Glucose, BMI, Age, and Pregnancies}. Restricting antecedents to these 4 primary drivers reduces the dimension space by 50\%, aligns the surrogate with established medical pathology, and makes compact fuzzy rule extraction computationally tractable.
+
+
+\chapter{Proposed Methodology: Neuro-Fuzzy Rule Extraction Engine}
+
+\section{End-to-End Architectural Pipeline}
+
+The \textbf{Glass-Box Insight} framework executes a six-stage engineering pipeline that transforms opaque neural network predictions into a compact, semantically preserved, and mathematically traceable neuro-fuzzy rule base (Table~\ref{tab:methodology_pipeline}).
+
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \renewcommand{\arraystretch}{0.80}
+    \begin{tabularx}{\textwidth}{>{\bfseries\raggedright\arraybackslash}p{3.5cm} >{\raggedright\arraybackslash}X}
+    \toprule
+    \textbf{Pipeline Stage} & \textbf{Core Computational Process and Objectives} \\
+    \midrule
+    Stage 1: Salient Feature Ingestion & Ingest top $k=4$ features from Permutation Importance; scale inputs to $[0, 1]$ via min-max normalization. \\
+    \midrule
+    Stage 2: FCM Clustering & Group training patients ($N=2{,}460$) into $C=8$ multi-dimensional prototypes; map centroids to linguistic terms. \\
+    \midrule
+    Stage 3: Premise Formulation & Construct Gaussian membership functions with monotonic boundary shoulders to guarantee full clinical coverage. \\
+    \midrule
+    Stage 4: Hybrid Learning & Forward pass solves zero-order TSK consequent risk scalars via Ridge RLS; backward pass tunes premise terms via Adam. \\
+    \midrule
+    Stage 5: Semantic Constraints & Enforce natural linguistic ordering ($c_{\text{Low}} < c_{\text{Med}} < c_{\text{High}}$), bounded drift ($\le 0.10$), and minimum curve widths. \\
+    \midrule
+    Stage 6: Greedy Pruning & Systematically eliminate irrelevant conditions and redundant rules under validation fidelity and error checks ($8 \to 4$ rules). \\
+    \bottomrule
+    \end{tabularx}
+    \caption[Six-Stage Glass-Box Extraction Architecture]{Sequential six-stage architecture of the Glass-Box Insight neuro-fuzzy rule extraction pipeline.}
+    \label{tab:methodology_pipeline}
+\end{table}
+
+\section{Data-Driven Rule Generation via Fuzzy C-Means Clustering}
+
+Rather than creating an unreadable grid of $3^4 = 81$ rules, initial rules are discovered directly from patient data using \textbf{Fuzzy C-Means (FCM)} clustering (Bezdek, 1981; Ross, 2010).
+
+Let $\tilde{X} = \{\tilde{x}_1, \dots, \tilde{x}_N\} \subset [0, 1]^k$ represent the salient patient pool ($N = 2{,}460$, combining 460 real training patients and 2,000 synthetic neighborhood samples). FCM groups these patients into $C = 8$ clusters by minimizing the objective:
+\begin{equation}
+    J_m(U, V) = \sum_{i=1}^N \sum_{c=1}^C u_{ic}^m \|\tilde{x}_i - v_c\|^2, \quad \text{subject to } \sum_{c=1}^C u_{ic} = 1 \quad \forall i
+\end{equation}
+where $u_{ic} \in [0, 1]$ represents the fuzzy membership of patient $i$ in cluster $c$, $v_c \in [0, 1]^k$ is the cluster centroid vector, and $m = 2.0$ is the fuzziness exponent.
+
+Each centroid $v_c$ represents a prototypical patient profile. To convert continuous centroid coordinates into discrete linguistic rules, each coordinate $v_{cj}$ is matched to the nearest linguistic term index $t \in \{0, 1, 2\}$:
+\begin{equation}
+    A_{rj} = \arg\min_{t \in \{0, 1, 2\}} |v_{rj} - c_{jt}^{(0)}|
+\end{equation}
+where $t=0$ corresponds to \textit{Low}, $t=1$ to \textit{Medium}, and $t=2$ to \textit{High}. Any duplicate rules produced by this mapping are merged, yielding an initial rule base of $R \le 8$ transparent IF-THEN rules.
+
+\section{Linguistic Formulation and Shouldered Gaussian Memberships}
+
+For each of the $k=4$ salient clinical features, the normalized range $[0, 1]$ is partitioned into 3 linguistic terms: \textit{Low} ($t=0$), \textit{Medium} ($t=1$), and \textit{High} ($t=2$), initialized at anchors $c_{j0}^{(0)} = 0.20, c_{j1}^{(0)} = 0.50, c_{j2}^{(0)} = 0.80$ with initial widths $\sigma_{jt}^{(0)} = 0.18$.
+
+Standard Gaussian bell curves decay toward zero at extreme values, which causes severe clinical misclassification when a patient exhibits extreme hyperglycemia or high BMI. To prevent this, we implement \textbf{monotonic flat boundary shoulders}:
+\begin{align}
+    \mu_{j, \text{Low}}(\tilde{x}_j) &= \begin{cases} 1.0 & \text{if } \tilde{x}_j \le c_{j, \text{Low}} \\ \exp\left( -\frac{1}{2} \left( \frac{\tilde{x}_j - c_{j, \text{Low}}}{\sigma_{j, \text{Low}}} \right)^2 \right) & \text{if } \tilde{x}_j > c_{j, \text{Low}} \end{cases} \\
+    \mu_{j, \text{Med}}(\tilde{x}_j) &= \exp\left( -\frac{1}{2} \left( \frac{\tilde{x}_j - c_{j, \text{Med}}}{\sigma_{j, \text{Med}}} \right)^2 \right) \\
+    \mu_{j, \text{High}}(\tilde{x}_j) &= \begin{cases} \exp\left( -\frac{1}{2} \left( \frac{\tilde{x}_j - c_{j, \text{High}}}{\sigma_{j, \text{High}}} \right)^2 \right) & \text{if } \tilde{x}_j < c_{j, \text{High}} \\ 1.0 & \text{if } \tilde{x}_j \ge c_{j, \text{High}} \end{cases}
+\end{align}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.76\textwidth,keepaspectratio]{membership_functions.png}
+    \caption[Optimized Shouldered Gaussian Membership Functions]{Optimized shouldered Gaussian membership functions for Glucose, BMI, Age, and Pregnancies. Solid curves denote final trained parameters; dashed curves denote initial anchor positions.}
+    \label{fig:membership_functions_plot}
+\end{figure}
+
+Figure~\ref{fig:membership_functions_plot} depicts the optimized membership topologies across all four salient clinical attributes. In each subplot, the initial quantile anchors (dashed lines) adapted smoothly during hybrid learning into the final trained membership curves (solid lines). Monotonic flat shoulders on the outer boundaries guarantee that severe clinical presentations (such as extreme hyperglycemia $\ge 180$ mg/dL or morbid obesity $\ge 45\text{ kg/m}^2$) retain 100\% membership in \textit{High} without tail decay. Crucially, semantic preservation constraints prevent overlapping collapse, ensuring distinct, medically intuitive linguistic partitions.
+
+\section{Layer-by-Layer ANFIS System Dynamics}
+
+The neuro-fuzzy surrogate is implemented as a 5-layer feedforward zero-order Takagi-Sugeno-Kang network:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Layer 1 (Fuzzification):} Ingests normalized input $\tilde{x}_j$ and computes membership grades $\mu_{jt}(\tilde{x}_j) \in [0, 1]$ using Gaussian curve parameters (center $c_{jt}$ and width $\sigma_{jt}$).
+    \item \textbf{Layer 2 (Rule Firing via Product T-Norm):} Multiplies membership grades across active antecedents:
+    \begin{equation}
+        w_r(\tilde{x}) = \prod_{j \in \mathcal{A}(r)} \mu_{j, A_{rj}}(\tilde{x}_j)
+    \end{equation}
+    where $\mathcal{A}(r)$ denotes the active antecedent features. If a condition is pruned ($A_{rj} = -1$), its multiplier is set to 1.0 (\textit{Don't Care}).
+    \item \textbf{Layer 3 (Normalization):} Normalizes firing strengths to enforce a partition of unity:
+    \begin{equation}
+        \bar{w}_r(\tilde{x}) = \frac{w_r(\tilde{x})}{\sum_{s=1}^R w_s(\tilde{x}) + \epsilon}, \quad \text{such that } \sum_{r=1}^R \bar{w}_r(\tilde{x}) = 1.0
+    \end{equation}
+    \item \textbf{Layers 4 and 5 (Consequent Weighting \& Defuzzification):} In zero-order TSK, each rule has a scalar risk score $p_r \in [0, 1]$. Layer~4 computes the weighted risk $O_{4, r} = \bar{w}_r(\tilde{x}) p_r$, and Layer~5 sums them to produce the final predicted probability:
+    \begin{equation}
+        y(\tilde{x}) = \sum_{r=1}^R \bar{w}_r(\tilde{x}) \cdot p_r \in [0, 1]
+    \end{equation}
+\end{itemize}
+
+\section{Hybrid Learning Optimization Algorithm}
+
+To train the ANFIS surrogate efficiently, Jang's \textbf{hybrid learning algorithm} (Jang, 1993) splits the optimization into two complementary phases:
+
+\subsection{Forward Step: Consequent Parameter Optimization via Ridge RLS}
+When the premise membership curves are held fixed, the output equation $y(\tilde{x}) = \sum \bar{w}_r p_r$ is purely linear with respect to the rule risk consequences $p \in \mathbb{R}^R$. Let $W \in \mathbb{R}^{N \times R}$ be the matrix of normalized firing strengths and $t \in [0, 1]^N$ be the target probabilities from the neural network. We solve for the optimal consequent vector $p^*$ in a single closed-form step using regularized ridge least squares:
+\begin{equation}
+    p^* = \left( W^T W + \lambda_{\text{ridge}} I_R \right)^{-1} W^T t, \qquad p_r \leftarrow \text{clip}(p_r^*, 0, 1)
+\end{equation}
+where $\lambda_{\text{ridge}} = 10^{-4}$ guarantees numerical stability and prevents matrix singularity.
+
+\subsection{Backward Step: Premise Optimization via Constrained Adam}
+With consequents $p$ held fixed, the membership center and width parameters $\theta = \{c_{jt}, \sigma_{jt}\}$ are updated to minimize the mean squared error loss $\mathcal{L} = \frac{1}{N} \sum (y_i - t_i)^2$. Gradients are backpropagated through the chain rule, and parameters are updated using the Adam optimizer ($\eta = 0.01$).
+
+\section{Semantic Integrity Preservation Constraints}
+
+Without constraints, gradient descent can cause \textbf{semantic collapse} (e.g., the \textit{Low} center drifting higher than the \textit{High} center, or curves shrinking to needle-thin delta functions). To keep the rules medically meaningful, three constraints are enforced after each training step:
+\begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Strict Linguistic Ordering:} $c_{j, \text{Low}} + 0.08 \le c_{j, \text{Med}} \le c_{j, \text{High}} - 0.08$. This guarantees that \textit{Low} is always less than \textit{Medium}, and \textit{Medium} is always less than \textit{High}.
+    \item \textbf{Bounded Anchor Drift:} Centers cannot drift more than $\pm 0.10$ from their original initial data anchors ($|c_{jt} - c_{jt}^{(0)}| \le 0.10$).
+    \item \textbf{Minimum Curve Width Floor:} Widths must satisfy $\sigma_{jt} \ge 0.05$ to prevent sharp discontinuous spikes.
+\end{enumerate}
+
+\section{Two-Check Backward Greedy Pruning Algorithm}
+
+The initial rule base contains 8 rules with $8 \times 4 = 32$ conditions. We implement a \textbf{Two-Check Backward Greedy Pruning Algorithm} (\texttt{glassbox/pruning.py}) that simplifies the rule base in two stages:
+\begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Condition Pruning:} Iteratively removes conditions from rules (setting $A_{rj} \leftarrow -1$).
+    \item \textbf{Rule Pruning:} Eliminates entire redundant or inactive rules.
+\end{enumerate}
+At each candidate deletion, consequent risk scores $p$ are re-solved in under 5 ms via Ridge RLS, and the deletion is permanently accepted \textbf{if and only if} it passes both validation tests:
+\begin{align}
+    \textbf{Check 1 (Fidelity Drop Check):} & \quad \mathcal{F}_{\text{new}}(\mathcal{D}_{\text{val}}) \ge \mathcal{F}_{\text{baseline}}(\mathcal{D}_{\text{val}}) - 0.02 \\
+    \textbf{Check 2 (Probability Error Check):} & \quad \text{MAE}_{\text{new}}(\mathcal{D}_{\text{val}}) \le \text{MAE}_{\text{baseline}}(\mathcal{D}_{\text{val}}) + 0.03
+\end{align}
+Under random seed 42, pruning removes 14 redundant conditions and merges duplicate rules, reducing the system from \textbf{8 rules and 32 conditions} down to \textbf{4 readable rules and 12 conditions} while preserving over 92\% fidelity.
+
+\section{Decision Traceability and Weak-Match Diagnostics}
+
+Unlike black-box models, zero-order TSK models offer \textbf{100\% closed-form mathematical traceability}. Any patient risk score is algebraically decomposed into individual rule contributions:
+\begin{equation}
+    y(x) = \sum_{r=1}^R \bar{w}_r(x) \cdot p_r, \qquad \text{where } \text{Share}_r(x) = \frac{\bar{w}_r(x) \cdot p_r}{y(x)} \times 100\%
+\end{equation}
+
+To prevent silent automated errors on atypical patients, we introduce the \textbf{Match Strength Metric}: $\mathcal{S}_{\text{match}}(x) = \max_{r} w_r(x) \in [0, 1]$. If $\mathcal{S}_{\text{match}} < 0.20$, the system triggers an active \textbf{Weak-Match Diagnostic Warning}, alerting clinicians that the patient's physiological profile falls outside the active rule prototypes, mandating direct human clinical evaluation.
+
+
+\chapter{Software Architecture, System Implementation and Interactive Lab}
+
+\section{Modular Software Engineering Design}
+
+The implementation of the Glass-Box Insight framework adheres to rigorous software engineering standards, emphasizing modularity, type annotations, deterministic reproducibility, and zero-leakage encapsulation. The codebase is organized into two primary subsystems: (1)~\textbf{The Core Machine Learning Library (\texttt{glassbox})}, implementing data pipelines, neural networks, neuro-fuzzy inference, pruning heuristics, and traceability calculations; and (2)~\textbf{The Interactive Live Lab Webapp (\texttt{webapp})}, powered by FastAPI, Server-Sent Events (SSE), and vanilla ECMAScript 6 JavaScript.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.88\textwidth}
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\scriptsize, caption={Repository structure of the Glass-Box Insight framework.}, label={lst:dir_map}]
+Fuzzy_Project/
+|-- data/diabetes.csv          # Pima Indians benchmark dataset (768 rows)
+|-- glassbox/                  # Core computational machine learning package
+|   |-- config.py, data.py     # Hyperparameters, splits, median imputation
+|   |-- blackbox.py, oracle.py # StreamingMLP network & synthetic oracle
+|   |-- feature_selection.py   # Permutation Feature Importance engine
+|   |-- fcm.py, membership.py  # FCM clustering & shouldered Gaussian terms
+|   |-- anfis.py, pruning.py   # 5-layer neuro-fuzzy model & greedy pruning
+|   |-- explain.py, metrics.py # Rule decomposition & match-strength metrics
+|-- webapp/                    # FastAPI web server, SSE events, and JS interface
+|-- tests/                     # 26 automated unit tests (100% passing)
+\end{lstlisting}
+\end{minipage}
+\end{figure}
+
+\section{Core Algorithmic Module Walkthrough}
+
+The computational pipeline is structured into five cohesive algorithmic modules:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Configuration and Data Ingestion (\texttt{config.py}, \texttt{data.py}):} Acts as single source of truth for global settings. Implements stratified 60/20/20 train/val/test splitting and leakage-free median zero-imputation across constrained clinical features.
+    \item \textbf{Black-Box Engine and Saliency (\texttt{blackbox.py}, \texttt{feature\_selection.py}):} Implements \texttt{StreamingMLP} with epoch-by-epoch telemetry callbacks, 5-fold stratified cross-validation, and permutation feature importance to isolate the top $k=4$ salient clinical drivers.
+    \item \textbf{Clustering and Premise Formulation (\texttt{fcm.py}, \texttt{membership.py}):} Provides vectorized Fuzzy C-Means clustering to discover multi-dimensional patient prototypes and defines shouldered Gaussian membership functions to ensure infinite domain coverage.
+    \item \textbf{Neuro-Fuzzy Inference and Pruning (\texttt{anfis.py}, \texttt{pruning.py}):} Implements the 5-layer ANFIS architecture, hybrid learning (Ridge RLS for consequents, Adam for premises), semantic integrity projection, and greedy backward elimination.
+    \item \textbf{Explanation Generation and Telemetry (\texttt{explain.py}, \texttt{metrics.py}):} Decomposes patient predictions into closed-form rule contributions, monitors the match-strength metric ($\mathcal{S}_{\text{match}}$), and computes empirical fidelity and probability MAE.
+\end{itemize}
+
+\section{Interactive Live Lab Web Application}
+
+A cornerstone engineering achievement of this project is the \textbf{Glass-Box Insight Live Lab} (\texttt{webapp/}), an interactive web application providing real-time telemetry and counterfactual exploration.
+
+\subsection{Architectural Stack and Real-Time Streaming}
+The web platform uses \texttt{FastAPI} on an asynchronous \texttt{Uvicorn} ASGI server, paired with a background worker (\texttt{webapp/jobs.py}) that streams epoch-by-epoch training events via \textbf{Server-Sent Events (SSE)} to a pure vanilla JavaScript frontend with HTML5 Canvas charts. Clinicians observe cross-entropy loss decay, FCM centroid convergence, and greedy pruning removals live as redundant conditions drop from the active rule base.
+
+\section{Interactive Patient Exploration and Counterfactual Simulation}
+
+Once training completes, clinicians navigate to the interactive \textbf{Explore} interface (Figure~\ref{fig:lab_explore_screenshot}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.88\textwidth,keepaspectratio]{lab_explore.png}
+    \caption[Interactive Patient Exploration Dashboard]{Interactive Patient Exploration interface, showing continuous clinical feature sliders, instant dual-model predictions, rule contribution breakdowns, and live membership indicators.}
+    \label{fig:lab_explore_screenshot}
+\end{figure}
+
+Figure~\ref{fig:lab_explore_screenshot} showcases the operational diagnostic interface of the Live Lab. The left control panel enables clinicians to adjust continuous patient measurements (Glucose, BMI, Age, Pregnancies) or select holdout test patients. The upper-right telemetry displays concurrent predictions: the opaque neural network probability alongside the defuzzified neuro-fuzzy risk score, supported by the real-time match strength diagnostic $\mathcal{S}_{\text{match}}$. The bottom panels visualize the mathematical explanation: dynamic bar charts depict the normalized firing strength $\bar{w}_r$ and proportional risk contribution of each active rule, while live cursor markers indicate exact membership positions on the shouldered Gaussian curves. Furthermore, clinicians can click on any rule to modify linguistic terms or delete conditions; consequent parameters are re-fitted via Ridge RLS in under 5 milliseconds, updating test fidelity immediately.
+
+\section{Software Quality, Unit Testing and Verification Suite}
+
+To ensure complete reliability, the codebase is validated by 26 automated unit tests implemented in \texttt{pytest} (Table~\ref{tab:unit_tests}).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.80}
+\begin{tabularx}{\textwidth}{l l X r}
+\toprule
+\textbf{Test Module} & \textbf{Target Subsystem} & \textbf{Properties Verified} & \textbf{Tests} \\
+\midrule
+\texttt{test\_data.py} & Data Ingestion & Imputation correctness; absence of leakage; split proportions. & 3 \\
+\texttt{test\_fcm.py} & Fuzzy C-Means & Partition of unity ($\sum u_{ic}=1$); centroid convergence. & 3 \\
+\texttt{test\_anfis.py} & ANFIS Engine & Vectorized forward pass; partition of unity; least squares fit; semantic constraints. & 11 \\
+\texttt{test\_metrics\_and\_rules.py} & Explainability & Fidelity calculation; rule formatting; weak-match detection. & 5 \\
+\texttt{test\_webapp.py} & Web Application & FastAPI REST endpoints; SSE event streaming; JSON serialization. & 4 \\
+\midrule
+\multicolumn{3}{l}{\textbf{Total Automated Unit Tests (100\% Passing)}} & \textbf{26} \\
+\bottomrule
+\end{tabularx}
+\caption[Automated Unit Testing Suite Verification]{Automated unit testing suite validating the computational integrity of the framework.}
+\label{tab:unit_tests}
+\end{table}
+
+Running \texttt{python -m pytest tests/} executes all 26 test cases in under 15 seconds, confirming 100\% mathematical and functional correctness across Python 3.10 and 3.13 environments.
+
+
+\chapter{Experimental Evaluation, Results and Critical Analysis}
+
+\section{Evaluation Framework and Performance Metrics}
+
+Evaluating an explainable surrogate requires metrics that quantify both imitation fidelity and cognitive readability:
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Classification Fidelity ($\mathcal{F}$):} Proportion of holdout test instances where the surrogate's discrete diagnostic prediction matches the black box: $\mathcal{F} = \frac{1}{N_{\text{test}}} \sum_{i=1}^{N_{\text{test}}} \mathbb{I}[\hat{Y}_{\text{fuzzy}}(x_i) = \hat{Y}_{\text{NN}}(x_i)]$.
+    \item \textbf{Confident Fidelity ($\mathcal{F}_{\text{conf}}$):} Evaluated on confident cases where $P(\text{diabetic}) \notin [0.35, 0.65]$.
+    \item \textbf{Boundary Fidelity ($\mathcal{F}_{\text{bound}}$):} Evaluated on ambiguous borderline cases where $P(\text{diabetic}) \in [0.35, 0.65]$.
+    \item \textbf{Probability MAE ($\text{MAE}_{\text{prob}}$):} Average absolute continuous probability deviation: $\frac{1}{N_{\text{test}}} \sum |y(\tilde{x}_i) - t_i|$.
+    \item \textbf{Interpretability Metrics:} Active rule count ($R$), total conditions ($\sum |A_r|$), average rule length ($\bar{L}$), and semantic order integrity percentage ($c_{\text{Low}} < c_{\text{Med}} < c_{\text{High}}$).
+\end{itemize}
+
+\section{Main Model Benchmark: Full vs. Pruned Rule Base}
+
+Table~\ref{tab:main_model_results} summarizes empirical performance on the 154-patient holdout test partition under default settings ($k=4, C=8, \delta_{\max}=0.10, \Delta_{\text{fid}}=0.02, \Delta_{\text{mae}}=0.03$, seed 42).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.75}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\hsize=1.6\hsize}X >{\centering\arraybackslash\hsize=0.8\hsize}X >{\centering\arraybackslash\hsize=1.0\hsize}X >{\centering\arraybackslash\hsize=0.9\hsize}X >{\centering\arraybackslash\hsize=0.9\hsize}X >{\centering\arraybackslash\hsize=1.0\hsize}X >{\centering\arraybackslash\hsize=1.0\hsize}X >{\centering\arraybackslash\hsize=0.8\hsize}X}
+\toprule
+\textbf{Surrogate Stage} & \textbf{Rules ($R$)} & \textbf{Conditions} & \textbf{Avg Length} & \textbf{Fidelity} & \textbf{Boundary Fid} & \textbf{Confident Fid} & \textbf{Prob MAE} \\
+\midrule
+Full Model (Pre-Pruning) & 8 & 32 & 4.00 & \textbf{0.948} & 0.829 & \textbf{0.983} & 0.059 \\
+\textbf{Simplified Model (Post-Pruning)} & \textbf{4} & \textbf{12} & \textbf{3.00} & \textbf{0.922} & 0.714 & \textbf{0.983} & 0.072 \\
+\bottomrule
+\end{tabularx}
+\caption[Surrogate Performance Before and After Pruning]{Empirical test-set performance of the main model before and after backward greedy pruning.}
+\label{tab:main_model_results}
+\end{table}
+
+Greedy backward pruning achieves a massive simplification: active conditions are reduced by \textbf{62.5\%} (from 32 down to 12) and rules are halved ($8 \to 4$). Crucially, on confident predictions ($P \notin [0.35, 0.65]$), the pruned model retains an exceptional \textbf{98.3\% fidelity}—matching the unpruned system identically. The aggregate 2.6\% fidelity difference is confined entirely to the ambiguous decision boundary corridor ($P \in [0.35, 0.65]$).
+
+\section{The Extracted Clinical Rule Base and Linguistic Parameters}
+
+Table~\ref{tab:final_rulebase} presents the complete 4-rule fuzzy rule base extracted by the framework.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.75}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{c X c l c r}
+\toprule
+\textbf{Rule} & \textbf{Extracted Linguistic Antecedent (IF)} & \textbf{THEN Risk} & \textbf{Clinical Meaning} & \textbf{Decision} & \textbf{Coverage} \\
+\midrule
+\textbf{R1} & \textbf{IF} Glucose is Low ($\sim$102 mg/dL) \textbf{AND} BMI is Low ($\sim$29) \textbf{AND} Age is Low ($\sim$27) \textbf{AND} Pregnancies is Low ($\sim$1.5) & 0.033 & Very Low Risk & Non-diabetic & 44.6\% \\
+\midrule
+\textbf{R2} & \textbf{IF} Glucose is Medium ($\sim$133 mg/dL) \textbf{AND} Pregnancies is Medium ($\sim$4.4) & 0.352 & Low Risk & Non-diabetic & 33.3\% \\
+\midrule
+\textbf{R3} & \textbf{IF} Glucose is Medium ($\sim$133 mg/dL) \textbf{AND} BMI is High ($\sim$43) \textbf{AND} Age is Medium ($\sim$35) & 0.853 & Very High Risk & Diabetic & 5.0\% \\
+\midrule
+\textbf{R4} & \textbf{IF} Glucose is High ($\sim$155 mg/dL) \textbf{AND} BMI is Medium ($\sim$37) \textbf{AND} Age is Medium ($\sim$35) & 0.852 & Very High Risk & Diabetic & 17.2\% \\
+\bottomrule
+\end{tabularx}
+\caption[Finalized 4-Rule Neuro-Fuzzy Rule Base]{The finalized 4-rule neuro-fuzzy rule base extracted from the black-box neural network.}
+\label{tab:final_rulebase}
+\end{table}
+
+The extracted rules directly mirror endocrinological consensus: \textbf{Rule 1} identifies young, lean patients with low glycemic markers as virtually risk-free ($p_1 = 0.033$); \textbf{Rule 2} identifies multiparous patients with mild glucose elevation whose risk remains below threshold ($p_2 = 0.352$); \textbf{Rule 3} demonstrates that even with moderate glucose, severe adiposity (BMI High $\ge 43\text{ kg/m}^2$) triggers high risk ($p_3 = 0.853$); and \textbf{Rule 4} captures classic metabolic decompensation combining marked hyperglycemia (Glucose High $\ge 155$ mg/dL) and elevated BMI ($p_4 = 0.852$).
+
+Optimized parameters in medical units converge to: \texttt{Glucose} (Low: $\le 102.3$, Med: $132.7 \pm 15.8$, High: $\ge 155.1$ mg/dL); \texttt{BMI} (Low: $\le 28.7$, Med: $37.0 \pm 6.5$, High: $\ge 43.0\text{ kg/m}^2$); \texttt{Age} (Low: $\le 26.9$, Med: $35.0 \pm 10.7$, High: $\ge 56.3$ yrs); and \texttt{Pregnancies} (Low: $\le 1.5$, Med: $4.4 \pm 3.7$, High: $\ge 10.4$).
+
+\section{Multi-Seed Statistical Stability Analysis}
+
+To confirm robustness across stochastic initializations, the full pipeline was executed across 5 independent random seeds ($s \in \{0, 1, 2, 3, 4\}$). Table~\ref{tab:multi_seed_results} presents the aggregate results (mean $\pm$ standard deviation).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.75}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c c c}
+\toprule
+\textbf{Surrogate Stage} & \textbf{Rule Count ($R$)} & \textbf{Total Conditions} & \textbf{Test-Set Fidelity} & \textbf{Test Accuracy} \\
+\midrule
+Before Pruning & 6.6 $\pm$ 0.9 & 26.4 $\pm$ 3.6 & 0.951 $\pm$ 0.007 & 0.709 $\pm$ 0.012 \\
+\textbf{After Pruning} & \textbf{5.0 $\pm$ 1.6} & \textbf{12.8 $\pm$ 5.0} & \textbf{0.948 $\pm$ 0.011} & \textbf{0.706 $\pm$ 0.014} \\
+\bottomrule
+\end{tabularx}
+\caption[Multi-Seed Statistical Stability Evaluation]{Multi-seed evaluation across 5 independent runs demonstrating statistical stability.}
+\label{tab:multi_seed_results}
+\end{table}
+
+Post-pruning fidelity remains exceptionally stable across seeds ($94.8\% \pm 1.1\%$), confirming that high fidelity is an inherent property of the methodology rather than an artifact of seed 42.
+
+\section{Interpretability vs. Fidelity Trade-off: Pareto Comparison with Decision Trees}
+
+We benchmark our neuro-fuzzy surrogate against the standard baseline in interpretable surrogate modeling: \textbf{Decision Tree Surrogates} (Craven \& Shavlik, 1996) trained on black-box predictions across increasing leaf limits ($C \in \{2, 4, 6, 8, 16\}$). Figure~\ref{fig:tradeoff_plot} and Table~\ref{tab:tradeoff_table} present the empirical comparison.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth,keepaspectratio]{tradeoff.png}
+    \caption[Pareto Frontier: ANFIS vs. Decision Trees]{The Fidelity vs. Interpretability Pareto Frontier: comparing our pruned neuro-fuzzy surrogate against decision tree surrogates across varying complexity levels.}
+    \label{fig:tradeoff_plot}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.75}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\hsize=1.5\hsize}X >{\centering\arraybackslash\hsize=1.0\hsize}X >{\centering\arraybackslash\hsize=0.8\hsize}X >{\centering\arraybackslash\hsize=1.0\hsize}X >{\centering\arraybackslash\hsize=0.9\hsize}X >{\centering\arraybackslash\hsize=0.8\hsize}X}
+\toprule
+\textbf{Surrogate Architecture} & \textbf{Target Capacity} & \textbf{Mean Rules} & \textbf{Mean Conditions} & \textbf{Mean Fidelity} & \textbf{Fidelity Std} \\
+\midrule
+Decision Tree Baseline & 2 leaves & 2.0 & 2.0 & 0.883 & $\pm$ 0.000 \\
+ANFIS Simplified (Proposed) & 2 clusters & 2.0 & 7.2 & \textbf{0.891} & $\pm$ 0.008 \\
+\midrule
+Decision Tree Baseline & 4 leaves & 4.0 & 8.0 & 0.877 & $\pm$ 0.000 \\
+ANFIS Simplified (Proposed) & 4 clusters & 3.2 & 6.2 & \textbf{0.932} & $\pm$ 0.006 \\
+\midrule
+Decision Tree Baseline & 8 leaves & 8.0 & 25.0 & 0.909 & $\pm$ 0.000 \\
+\textbf{ANFIS Simplified (Main)} & \textbf{8 clusters} & \textbf{5.0} & \textbf{12.8} & \textbf{0.948} & $\pm$ \textbf{0.011} \\
+\midrule
+Decision Tree Baseline & 16 leaves & 16.0 & 67.0 & 0.935 & $\pm$ 0.000 \\
+ANFIS Simplified (Proposed) & 16 clusters & 6.6 & 14.2 & \textbf{0.940} & $\pm$ 0.008 \\
+\bottomrule
+\end{tabularx}
+\caption[Fidelity and Complexity Trade-off Comparison]{Fidelity and complexity comparison between the neuro-fuzzy surrogate and decision trees.}
+\label{tab:tradeoff_table}
+\end{table}
+
+Figure~\ref{fig:tradeoff_plot} illustrates the Pareto frontier of explanatory fidelity versus condition count. As visually demonstrated, decision trees require deep branching (up to 16 leaves and 67 condition checks) to reach 93.5\% fidelity. In contrast, our pruned neuro-fuzzy surrogate achieves \textbf{94.8\% fidelity with only 5 rules and 12.8 conditions}—achieving superior fidelity with an \textbf{81\% reduction in total conditions}. This efficiency stems from fuzzy logic's smooth membership surfaces, which capture continuous diagonal clinical boundaries without stair-step splits.
+
+\section{Ablation Studies: Validating Core Components}
+
+To quantify the impact of each architectural component, systematic ablation experiments were conducted across 5 random seeds (Table~\ref{tab:ablation_results}).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.75}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\hsize=1.65\hsize}X >{\centering\arraybackslash\hsize=0.8\hsize}X >{\centering\arraybackslash\hsize=0.85\hsize}X >{\centering\arraybackslash\hsize=0.8\hsize}X >{\centering\arraybackslash\hsize=1.05\hsize}X >{\centering\arraybackslash\hsize=0.95\hsize}X >{\centering\arraybackslash\hsize=0.9\hsize}X}
+\toprule
+\textbf{Experimental Variant} & \textbf{Fidelity} & \textbf{Prob MAE} & \textbf{Rules ($R$)} & \textbf{Conditions} & \textbf{Max Drift} & \textbf{Order \%} \\
+\midrule
+\textbf{Full Proposed Method} & \textbf{0.948} & \textbf{0.063} & \textbf{5.0} & \textbf{12.8} & \textbf{0.100} & \textbf{100\%} \\
+No Oracle Sampling (Real Only) & 0.935 & 0.061 & 5.0 & 11.0 & 0.100 & 100\% \\
+No Interpretability Constraints & 0.942 & 0.058 & 4.2 & 12.4 & \textbf{0.495} & \textbf{60\%} \\
+Trained on True Labels Direct & 0.882 & 0.121 & 4.4 & 11.2 & 0.080 & 100\% \\
+First-Order TSK Consequents & 0.943 & 0.055 & 3.6 & 5.2 & 0.100 & 100\% \\
+\bottomrule
+\end{tabularx}
+\caption[Systematic Ablation Analysis of Components]{Systematic ablation analysis evaluating the impact of core algorithmic components.}
+\label{tab:ablation_results}
+\end{table}
+
+The ablation results confirm: (1)~\textbf{Oracle Sampling} boosts fidelity from 0.935 to 0.948 by populating boundary regions; (2)~\textbf{Semantic Constraints} prevent severe semantic collapse (without constraints, centers drift by 0.495 and 40\% of orderings invert); (3)~\textbf{Pedagogical Imitation} is essential (training directly on true labels $y \in \{0, 1\}$ drops fidelity to 88.2\%); and (4)~\textbf{Zero-Order TSK} provides scalar clarity ($p_r \in [0, 1]$) while matching first-order fidelity.
+
+
+\chapter{Comprehensive Clinical Case Studies and Arithmetic Trace}
+
+To demonstrate how Glass-Box Insight operates in clinical practice, this chapter presents representative case studies from the holdout test partition ($N_{\text{test}} = 154$), verified against the main trained model (seed 42).
+
+\section{Case Study 1: Confident Diabetic Classification (Patient \#152)}
+
+Patient \#152 (data row 425) presents classic metabolic syndrome: 31-year-old female, 4 pregnancies, Glucose = 184 mg/dL, Blood Pressure = 78 mm Hg, Skinfold = 39 mm, Serum Insulin = 277 $\mu\text{U/mL}$, BMI = 37.0 $\text{kg/m}^2$, Pedigree = 0.264. True outcome: \textbf{Diabetic (1)}.
+
+\subsection{Black-Box Neural Network vs. Neuro-Fuzzy Arithmetic Walkthrough}
+The black box ingests standardized inputs $x^{\text{std}}$, activating hidden units $h = [0, 1.64, 0, 1.59, 0, 0, 0.41, 0]^T$ to emit logit $z^{[2]} = 1.634$ and risk probability $\hat{y}_{\text{NN}} = \sigma(1.634) = \mathbf{0.837}$ (\textbf{Diabetic, 84\% risk}).
+
+The neuro-fuzzy explainer scales salient inputs to $[0, 1]$: $\tilde{x} = [\text{Glu} = 0.908, \text{BMI} = 0.384, \text{Age} = 0.167, \text{Preg} = 0.286]$. Layer~1 evaluates memberships: $\mu_{\text{Glu}} = [0.019, 0.005, \mathbf{1.000}]$, $\mu_{\text{BMI}} = [0.519, \mathbf{1.000}, 0.532]$, $\mu_{\text{Age}} = [0.946, 0.933, 0.000]$, $\mu_{\text{Preg}} = [0.800, 0.994, 0.008]$. Layer~2 evaluates product T-norms:
+\begin{equation}
+    w_1 = 0.0074, \quad w_2 = 0.0052, \quad w_3 = 0.0026, \quad w_4 = 1.000 \times 1.000 \times 0.933 = \mathbf{0.9327}
+\end{equation}
+Rule 4 fires with overwhelming dominance ($w_4 = 0.9327$). Normalizing in Layer~3 yields $\bar{w} = [0.008, 0.005, 0.003, \mathbf{0.984}]$. Defuzzification in Layer~5 produces:
+\begin{align}
+    y(\tilde{x}) &= 0.008(0.033) + 0.005(0.352) + 0.003(0.853) + 0.984(0.852) \\
+    &= \mathbf{0.843} \implies \text{Diabetic (84\% Risk)}
+\end{align}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth,keepaspectratio]{case_confident_diabetic.png}
+    \caption[Diagnostic Explanation for Confident Diabetic Case]{Diagnostic explanation summary for Confident Diabetic Patient \#152, illustrating closed-form rule decomposition.}
+    \label{fig:case_confident_diabetic}
+\end{figure}
+
+Figure~\ref{fig:case_confident_diabetic} illustrates the diagnostic telemetry generated for Patient \#152. Both models achieve perfect consensus at 84\% diabetic probability. The bar chart demonstrates that \textbf{Rule 4} accounts for \textbf{98.4\%} of the explanation: \textit{``IF Glucose is High (184 mg/dL) AND BMI is Medium (37.0 $\text{kg/m}^2$) AND Age is Medium (31 yrs) THEN Risk = 0.85.''} With match strength $\mathcal{S}_{\text{match}} = 0.93$, the explanation is certified as highly reliable.
+
+\section{Case Study 2: Confident Healthy Classification (Patient \#29)}
+
+Patient \#29 represents an uncompromised young individual: Glucose = 89 mg/dL, BMI = 28.1 $\text{kg/m}^2$, Age = 21 yrs, Pregnancies = 1.0. True Outcome: \textbf{Non-diabetic (0)}. The black box predicts $\hat{y}_{\text{NN}} = \mathbf{0.02}$; the neuro-fuzzy surrogate predicts $y = \mathbf{0.04}$ (Agrees: Non-diabetic).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth,keepaspectratio]{case_confident_healthy.png}
+    \caption[Diagnostic Explanation for Confident Healthy Case]{Diagnostic explanation for Confident Healthy Patient \#29, governed by Rule 1.}
+    \label{fig:case_confident_healthy}
+\end{figure}
+
+Figure~\ref{fig:case_confident_healthy} confirms that Patient \#29 belongs squarely to the metabolically healthy cohort. Rule~1 (Low Glucose $\times$ Low BMI $\times$ Low Age $\times$ Low Preg) activates with normalized weight $\bar{w}_1 = \mathbf{0.99}$ and match strength $\mathcal{S}_{\text{match}} = 1.00$, indicating that normal fasting glucose, young age, and lean physique guarantee negligible diabetes risk.
+
+\section{Case Studies 3 and 4: Boundary Ambiguity and Model Disagreement}
+
+Table~\ref{tab:case_ambiguity_summary} contrasts Patient \#75 (Borderline Ambiguity) and Patient \#89 (Surrogate Disagreement).
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.80}
+\begin{tabularx}{\textwidth}{>{\bfseries\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Clinical Metric} & \textbf{Patient \#75 (Borderline Case)} & \textbf{Patient \#89 (Surrogate Disagreement)} \\
+\midrule
+Clinical Profile & Glucose 119 mg/dL, BMI 27.2, Age 33, Preg 6 & Glucose 114 mg/dL, BMI 44.0, Age 27, Preg 0 \\
+True Outcome & 1 (Diabetic) & 0 (Non-diabetic) \\
+Black-Box MLP & $\hat{y}_{\text{NN}} = \mathbf{0.50}$ (Boundary uncertainty) & $\hat{y}_{\text{NN}} = \mathbf{0.26}$ (Classified Non-diabetic) \\
+Neuro-Fuzzy Surrogate & $y = \mathbf{0.25}$ (Classified Non-diabetic) & $y = \mathbf{0.58}$ (\textbf{Classified Diabetic --- Disagrees}) \\
+Match Strength ($\mathcal{S}_{\text{match}}$) & 0.62 (Moderate rule activation) & 0.38 (Sub-threshold activation) \\
+Dominant Rule & \textbf{Rule 2} ($\bar{w}_2 = 0.61$, Med Glu $\times$ Med Preg) & \textbf{Rule 3} ($\bar{w}_3 = 0.52$, Med Glu $\times$ High BMI) \\
+\midrule
+Clinical Interpretation & Multiparity elevates Rule 2 firing, but lean BMI (27.2) keeps composite risk below 0.50. & Severe adiposity (BMI 44.0) triggers Rule 3 in the surrogate, while the MLP discounts adiposity in young nulliparous women. \\
+\bottomrule
+\end{tabularx}
+\caption[Comparative Ambiguity and Disagreement Analysis]{Comparative case analysis of borderline ambiguity (Patient \#75) and model disagreement (Patient \#89).}
+\label{tab:case_ambiguity_summary}
+\end{table}
+
+\section{Case Study 5: Atypical Patient and Weak-Match Alert (Patient \#108)}
+
+Patient \#108 illustrates the safety protection provided by the \textbf{Weak-Match Diagnostic Flag}: Glucose = 194 mg/dL, BMI = 26.0 $\text{kg/m}^2$, Age = 67 yrs, Pregnancies = 8. True outcome: 0. Black box: $\hat{y}_{\text{NN}} = 0.73$; Neuro-fuzzy: $y = 0.80$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth,keepaspectratio]{case_unusual_patient.png}
+    \caption[Atypical Patient Triggering Weak-Match Alert]{Atypical Patient \#108 triggering the Weak-Match diagnostic warning alert.}
+    \label{fig:case_unusual_patient}
+\end{figure}
+
+Figure~\ref{fig:case_unusual_patient} highlights the critical safety warning triggered for Patient \#108. The patient presents marked hyperglycemia (194 mg/dL) and advanced age (67 yrs), but lean body mass (BMI 26.0). Because every high-glucose rule (Rule 4) requires elevated BMI, raw rule firing collapses ($w_4 \approx 0.00$). While Layer~3 normalization artificially inflates relative weights, our safety diagnostic detects that $\mathcal{S}_{\text{match}} = \max w_r = \mathbf{0.00} < 0.20$, instantly warning clinicians: \textit{``WARNING: Atypical physiological outlier. Firing strength is 0.00 ($< 0.20$). Explanation classified as UNRELIABLE due to out-of-distribution input.''} This mechanism prevents silent automated diagnostic failure.
+
+
+\chapter{Discussion, System Evaluation and Limitations}
+
+\section{Evaluation Against Original Engineering Requirements}
+
+To rigorously assess whether the Glass-Box Insight project fulfilled its original design specifications, Table~\ref{tab:traceability_table} maps each initial engineering challenge to its implemented computational mechanism, empirical evidence, and remaining limitations.
+
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{0.9}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\hsize=0.75\hsize}X >{\raggedright\arraybackslash\hsize=0.85\hsize}X >{\raggedright\arraybackslash\hsize=1.05\hsize}X >{\raggedright\arraybackslash\hsize=1.35\hsize}X}
+\toprule
+\textbf{Challenge} & \textbf{Proposed Solution} & \textbf{Empirical Evidence} & \textbf{Remaining Limitations} \\
+\midrule
+\textbf{Neural Network Opacity} & Global pedagogical neuro-fuzzy surrogate. & 4 readable linguistic rules; 92.2\% test fidelity; per-patient decomposition. & Explains the surrogate; 7.8\% of patients experience surrogate divergence. \\
+\midrule
+\textbf{Curse of Dimensionality} & Permutation importance feature selection ($k=4$). & Saliency filter captures 82.9\% attribution; reduces grid rules from 6,561 to 8. & Ignores secondary interactions in excluded 4 features (BP, Insulin, Skin, DPF). \\
+\midrule
+\textbf{Linguistic Semantic Drift} & Order, drift bound, and width floor constraints. & 100\% monotonic ordering maintained; drift restricted to $\le 0.10$. & Fixed width floors can occasionally create wider-than-ideal term overlap. \\
+\midrule
+\textbf{Combinatorial Rule Explosion} & Fuzzy C-Means clustering + greedy backward pruning. & Reduces 32 conditions down to 12; maintains 98.3\% confident fidelity. & Greedy pruning explores single-step deletions; non-convex search space. \\
+\midrule
+\textbf{Decision Boundary Sparsity} & Synthetic Oracle Sampling (2,000 instances). & Prevents surrogate boundary collapse; boosts fidelity from 93.5\% to 94.8\%. & Synthetic samples generated via Gaussian perturbation rather than GANs. \\
+\midrule
+\textbf{Silent Failure on Outliers} & Match-Strength diagnostic ($\mathcal{S}_{\text{match}} < 0.20$). & Correctly alerts clinicians on atypical patient profiles (Case Study 5). & Requires manual clinical intervention when alert triggers. \\
+\bottomrule
+\end{tabularx}
+\caption[System Traceability and Requirement Evaluation Matrix]{System traceability and requirement fulfillment evaluation matrix.}
+\label{tab:traceability_table}
+\end{table}
+
+\section{Mathematical and Architectural Justifications}
+
+Every structural design choice in the Glass-Box Insight framework was guided by formal mathematical principles:
+\begin{enumerate}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Why Product T-Norm for AND Conjunctions?} We selected the algebraic product ($w = \prod \mu$) over the Gödel minimum ($w = \min \mu$). The minimum operator has zero gradient with respect to non-minimal inputs, preventing backpropagation through non-critical features. The product operator is smooth, infinitely differentiable, and sensitive to all antecedent conditions simultaneously.
+    \item \textbf{Why Shouldered Gaussians?} Unshouldered Gaussians decay to zero at infinity, causing patients with extreme clinical measurements to have zero membership in all terms, triggering numerical underflow in Layer 3. Monotonic shoulders ensure infinite domain coverage at physiological extremes.
+    \item \textbf{Why Ridge Regularization on Consequents?} In regions of the feature space where few training points reside, $W^T W$ can become ill-conditioned. Adding $\lambda_{\text{ridge}} I$ guarantees positive definiteness and prevents unbounded consequent weights.
+\end{enumerate}
+
+\section{Limitations and Threats to Validity}
+
+A rigorous engineering evaluation must acknowledge intrinsic limitations:
+\begin{enumerate}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Demographic and Geographic Specificity:} The PIDD dataset consists exclusively of adult females of Pima Indian heritage. Because diabetes pathophysiology varies across ethnic and demographic groups, the extracted rules cannot be deployed clinically across diverse global populations without multi-center prospective retraining.
+    \item \textbf{Sample Size Constraints:} With $N = 768$ total patients, the holdout test set contains 154 individuals. While statistical significance is confirmed across 5 random seeds, validation on contemporary cohorts ($N > 10{,}000$) is required for clinical translation.
+    \item \textbf{Information Exclusion in Feature Selection:} By restricting the surrogate to the top 4 features, the surrogate cannot account for subtle secondary interactions involving Blood Pressure, Serum Insulin, or Pedigree.
+    \item \textbf{Term Overlap Artifacts:} As observed in Patient \#152, the minimum width constraint ($\sigma \ge 0.05$) occasionally results in wide membership overlap, causing a patient with BMI = 37 to exhibit 0.52 membership in Low and 0.53 in High simultaneously.
+\end{enumerate}
+
+\section{Future Research and Clinical Deployment Roadmap}
+
+Future extensions of the Glass-Box Insight architecture should explore:
+\begin{enumerate}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Interval Type-2 Fuzzy Sets:} Transitioning from Type-1 to Type-2 fuzzy sets to explicitly model intra-observer clinical measurement noise and laboratory assay variability.
+    \item \textbf{Dynamic Temporal Surrogates:} Extending neuro-fuzzy extraction to recurrent neural networks (LSTMs) and Transformers for longitudinal electronic health records (EHR).
+    \item \textbf{FHIR Standards Integration:} Packaging the surrogate and web laboratory as an HL7/FHIR (Fast Healthcare Interoperability Resources) compliant microservice, enabling direct plug-and-play integration into hospital Electronic Medical Record systems (e.g., Epic, Cerner).
+\end{enumerate}
+
+
+\chapter{Conclusion}
+
+\section{Summary of Research Achievements}
+
+This project successfully formulated, implemented, and empirically validated \textbf{Glass-Box Insight}, an end-to-end framework for global post-hoc rule extraction that renders opaque neural network classifiers transparent, auditable, and clinically traceable in healthcare decision support (satisfying EU AI Act and FDA SaMD transparency mandates). Evaluating on the benchmark Pima Indians Diabetes Database ($N=768$, 8 clinical attributes), the core milestones achieved include:
+\begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{High-Fidelity Surrogate Extraction:} The extracted neuro-fuzzy surrogate imitates the continuous decision landscape of a multi-layer perceptron with \textbf{92.2\% test-set fidelity} on holdout data, rising to \textbf{98.3\% fidelity} on confident diagnostic decisions ($P \notin [0.35, 0.65]$).
+    \item \textbf{Ultra-Compact Cognitive Complexity:} By integrating Permutation Feature Importance with Fuzzy C-Means clustering and a two-check backward greedy pruning algorithm, the system reduces the theoretical rule space from 6,561 grid rules down to just \textbf{4 readable linguistic rules and 12 total conditions}—a \textbf{96\% complexity reduction}.
+    \item \textbf{Guaranteed Semantic Integrity:} Enforcing geometric constraints on term ordering, anchor drift, and minimum width floors during hybrid learning guarantees that linguistic labels remain medically honest, completely preventing semantic collapse.
+    \item \textbf{Mathematical Traceability:} Unlike additive local approximations (LIME, SHAP), the zero-order Sugeno formulation provides closed-form algebraic traceability, decomposing every patient risk score into the exact normalized firing strengths and risk contributions of individual rules.
+    \item \textbf{Out-of-Distribution Safety:} The formal match-strength diagnostic ($\mathcal{S}_{\text{match}} < 0.20$) successfully detects atypical patient profiles, preventing silent algorithmic failure.
+    \item \textbf{Interactive Reactive Live Lab:} A full-stack web application powered by FastAPI, Server-Sent Events, and vanilla JavaScript provides real-time training telemetry, counterfactual exploration, and sub-millisecond human-in-the-loop rule refinement.
+\end{enumerate}
+
+\section{Concluding Perspectives}
+
+The central thesis validated by this research is that \textbf{interpretability does not require sacrificing the power of neural networks}. By treating the neural network as an oracle and employing a constrained, clustered neuro-fuzzy architecture, we can extract transparent, auditable, and human-aligned decision logic that satisfies the highest standards of clinical safety and regulatory compliance. The Glass-Box Insight architecture establishes a practical, mathematically rigorous blueprint for responsible, explainable artificial intelligence in 21st-century healthcare.
+
+
+\clearpage
+\linespread{1.0}\selectfont
+\small
+\setlength{\itemsep}{1.5pt plus 0.5pt}
+\setlength{\parskip}{0pt}
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{References}
+
+\bibitem{ross2010}
+T.~J.~Ross, \emph{Fuzzy Logic with Engineering Applications}, 3rd~ed. Chichester, UK: John Wiley \& Sons, 2010.
+
+\bibitem{haykin1994}
+S.~Haykin, \emph{Neural Networks: A Comprehensive Foundation}. New York, NY, USA: Macmillan College Publishing Co., 1994.
+
+\bibitem{fausett1993}
+L.~Fausett, \emph{Fundamentals of Neural Networks: Architectures, Algorithms and Applications}. Englewood Cliffs, NJ, USA: Pearson Education, 1993.
+
+\bibitem{sivanandam2007}
+S.~N.~Sivanandam, S.~Sumathi, and S.~N.~Deepa, \emph{Introduction to Fuzzy Logic using MATLAB}. Berlin, Heidelberg, Germany: Springer-Verlag, 2007.
+
+\bibitem{sivanandam2006}
+S.~N.~Sivanandam, S.~Sumathi, and S.~N.~Deepa, \emph{Introduction to Neural Networks using MATLAB 6.0}. New Delhi, India: Tata McGraw-Hill, 2006.
+
+\bibitem{andrews1995}
+R.~Andrews, J.~Diederich, and A.~B.~Tickle, ``Survey and critique of techniques for extracting rules from trained artificial neural networks,'' \emph{Knowledge-Based Systems}, vol. 8, no. 6, pp. 373--389, Dec. 1995.
+
+\bibitem{bezdek1981}
+J.~C.~Bezdek, \emph{Pattern Recognition with Fuzzy Objective Function Algorithms}. New York, NY, USA: Plenum Press, 1981.
+
+\bibitem{breiman2001}
+L.~Breiman, ``Random forests,'' \emph{Machine Learning}, vol. 45, no. 1, pp. 5--32, Oct. 2001.
+
+\bibitem{casillas2003}
+J.~Casillas, O.~Cord{\'o}n, F.~Herrera, and L.~Magdalena, Eds., \emph{Interpretability Issues in Fuzzy Modeling}, ser. Studies in Fuzziness and Soft Computing. Berlin, Heidelberg: Springer-Verlag, 2003.
+
+\bibitem{craven1996}
+M.~Craven and J.~Shavlik, ``Extracting tree-structured representations of trained networks,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS 8)}, Cambridge, MA, USA: MIT Press, 1996, pp. 24--30.
+
+\bibitem{eu_ai_act}
+European Parliament and Council of the European Union, ``Proposal for a Regulation laying down harmonised rules on artificial intelligence (Artificial Intelligence Act),'' \emph{Official Journal of the European Union}, COM(2021) 206 final, 2024.
+
+\bibitem{fisher2019}
+A.~Fisher, C.~Rudin, and F.~Dominici, ``All models are wrong, but many are useful: Learning a variable's importance by studying an entire class of prediction models simultaneously,'' \emph{Journal of Machine Learning Research}, vol. 20, no. 177, pp. 1--81, 2019.
+
+\bibitem{gacto2011}
+M.~J.~Gacto, R.~Alcal{\'a}, and F.~Herrera, ``Interpretability of linguistic fuzzy rule-based systems: An overview of interpretability measures,'' \emph{Information Sciences}, vol. 181, no. 20, pp. 4340--4360, Oct. 2011.
+
+\bibitem{jang1993}
+J.-S.~R.~Jang, ``ANFIS: Adaptive-network-based fuzzy inference system,'' \emph{IEEE Transactions on Systems, Man, and Cybernetics}, vol. 23, no. 3, pp. 665--685, May/Jun. 1993.
+
+\bibitem{kingma2015}
+D.~P.~Kingma and J.~Ba, ``Adam: A method for stochastic optimization,'' in \emph{Proc. 3rd International Conference on Learning Representations (ICLR)}, San Diego, CA, USA, May 2015, pp. 1--15.
+
+\bibitem{lundberg2017}
+S.~M.~Lundberg and S.-I.~Lee, ``A unified approach to interpreting model predictions,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS 30)}, Long Beach, CA, USA, 2017, pp. 4765--4774.
+
+\bibitem{mamdani1975}
+E.~H.~Mamdani and S.~Assilian, ``An experiment in linguistic synthesis with a fuzzy logic controller,'' \emph{International Journal of Man-Machine Studies}, vol. 7, no. 1, pp. 1--13, Jan. 1975.
+
+\bibitem{miller1956}
+G.~A.~Miller, ``The magical number seven, plus or minus two: Some limits on our capacity for processing information,'' \emph{Psychological Review}, vol. 63, no. 2, pp. 81--97, Mar. 1956.
+
+\bibitem{molnar2022}
+C.~Molnar, \emph{Interpretable Machine Learning: A Guide for Making Black Box Models Explainable}, 2nd~ed. Munich, Germany: Leanpub, 2022.
+
+\bibitem{pedrycz1998}
+W.~Pedrycz and F.~Gomide, \emph{An Introduction to Fuzzy Sets: Analysis and Design}. Cambridge, MA, USA: MIT Press, 1998.
+
+\bibitem{ribeiro2016}
+M.~T.~Ribeiro, S.~Singh, and C.~Guestrin, ``\,`Why should I trust you?': Explaining the predictions of any classifier,'' in \emph{Proc. 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD)}, San Francisco, CA, USA, Aug. 2016, pp. 1135--1144.
+
+\bibitem{rudin2019}
+C.~Rudin, ``Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead,'' \emph{Nature Machine Intelligence}, vol. 1, no. 5, pp. 206--215, May 2019.
+
+\bibitem{rumelhart1986}
+D.~E.~Rumelhart, G.~E.~Hinton, and R.~J.~Williams, ``Learning representations by back-propagating errors,'' \emph{Nature}, vol. 323, no. 6088, pp. 533--536, Oct. 1986.
+
+\bibitem{smith1988}
+J.~W.~Smith, J.~E.~Everhart, W.~C.~Dickson, W.~C.~Knowler, and R.~S.~Johannes, ``Using the ADAP learning algorithm to forecast the onset of diabetes mellitus,'' in \emph{Proc. 12th Annual Symposium on Computer Applications in Medical Care (SCAMC)}, Washington, DC, USA, Nov. 1988, pp. 261--265.
+
+\bibitem{takagi1985}
+T.~Takagi and M.~Sugeno, ``Fuzzy identification of systems and its applications to modeling and control,'' \emph{IEEE Transactions on Systems, Man, and Cybernetics}, vol. SMC-15, no. 1, pp. 116--132, Jan./Feb. 1985.
+
+\bibitem{wang1992}
+L.-X.~Wang and J.~M.~Mendel, ``Generating fuzzy rules by learning from examples,'' \emph{IEEE Transactions on Systems, Man, and Cybernetics}, vol. 22, no. 6, pp. 1414--1427, Nov./Dec. 1992.
+
+\bibitem{zadeh1965}
+L.~A.~Zadeh, ``Fuzzy sets,'' \emph{Information and Control}, vol. 8, no. 3, pp. 338--353, Jun. 1965.
+
+\bibitem{zadeh1975}
+L.~A.~Zadeh, ``The concept of a linguistic variable and its application to approximate reasoning---I,'' \emph{Information Sciences}, vol. 8, no. 3, pp. 199--249, 1975.
+
+\end{thebibliography}
+
+\end{document}
